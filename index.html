@@ -719,10 +719,16 @@
       color: #e2e8f0;
     }
 
-    /* Decorative GIF: never receives clicks; below modals (z-index 1000+). */
+    /* Decorative GIF: below volume HUD and modals; never receives clicks. */
+    #floatingGifHost {
+      position: relative;
+      z-index: 40;
+      isolation: isolate;
+    }
+
     .floating-gif {
       position: fixed;
-      z-index: 60;
+      z-index: 1;
       max-width: min(200px, 26vw);
       width: min(200px, 26vw);
       height: auto;
@@ -753,32 +759,84 @@
       width: 560px;
       height: 315px;
     }
+
+    /* Background track volume — above floating GIFs (see #floatingGifHost / .floating-gif). */
+    .bg-vol-panel {
+      position: fixed;
+      top: 0.65rem;
+      right: 0.65rem;
+      z-index: 10050;
+      transform: translateZ(0);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.35rem;
+      padding: 0.5rem 0.65rem;
+      background: rgba(15, 20, 28, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(8px);
+      max-width: min(220px, 46vw);
+    }
+
+    .bg-vol-panel label {
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .bg-vol-readout {
+      font-size: 0.72rem;
+      color: var(--c-body-text);
+      opacity: 0.92;
+      line-height: 1.3;
+      text-align: right;
+    }
+
+    #bgVolSlider {
+      width: 168px;
+      max-width: 100%;
+      accent-color: var(--c-submit-grad-b);
+    }
+
+    .bg-vol-panel.bg-vol-panel--egg-locked {
+      opacity: 0.88;
+      pointer-events: none;
+    }
+
+    .bg-vol-panel.bg-vol-panel--egg-locked #bgVolSlider {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
   <!-- Source: https://tenor.com/view/jjk-hikari-gif-1408129775731152385 — 1–5 copies per slot spin -->
   <div id="floatingGifHost" aria-hidden="true"></div>
-  <!-- Background music: https://www.youtube.com/watch?v=34Pl2DTuwoQ -->
-  <div class="yt-egg-host" aria-hidden="true">
-    <iframe
-      id="ytBgFrame"
-      title="Background music"
-      src=""
-      style="border: 0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      loading="lazy"
-    ></iframe>
+  <div
+    class="bg-vol-panel"
+    role="group"
+    aria-label="Background track volume"
+  >
+    <label for="bgVolSlider">
+      <span id="bgVolLabel" class="bg-vol-readout">Volume: —</span>
+    </label>
+    <input
+      type="range"
+      id="bgVolSlider"
+      min="0"
+      max="100"
+      value="50"
+      step="1"
+    />
   </div>
-  <!-- Easter egg audio: https://www.youtube.com/watch?v=Upsm3E2NUI8 -->
+  <!-- Background music (YouTube IFrame API for volume): https://www.youtube.com/watch?v=34Pl2DTuwoQ -->
   <div class="yt-egg-host" aria-hidden="true">
-    <iframe
-      id="ytEggFrame"
-      title="Easter egg"
-      src=""
-      style="border: 0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      loading="lazy"
-    ></iframe>
+    <div id="ytBgPlayerHost"></div>
+  </div>
+  <!-- Easter egg audio (IFrame API for locked 100% vol): https://www.youtube.com/watch?v=Upsm3E2NUI8 -->
+  <div class="yt-egg-host" aria-hidden="true">
+    <div id="ytEggPlayerHost"></div>
   </div>
   <main>
     <h1>Enter your name</h1>
@@ -966,6 +1024,167 @@
       var GOKU_IMG_SRC =
         "https://i.pinimg.com/736x/02/ae/ed/02aeed97dcb6089eb5258d29fb9a759b.jpg";
 
+      var ytBgPlayer = null;
+      var ytEggPlayer = null;
+
+      /** Each slider index 0…100 maps to a shuffled real volume % (non-linear, random order). */
+      var BG_VOL_SLIDER_MAX = 100;
+      function buildBgVolumeShuffleTable() {
+        var a = [];
+        for (var bv = 0; bv <= BG_VOL_SLIDER_MAX; bv++) {
+          a.push(bv);
+        }
+        for (var bi = a.length - 1; bi > 0; bi--) {
+          var bj = Math.floor(Math.random() * (bi + 1));
+          var bt = a[bi];
+          a[bi] = a[bj];
+          a[bj] = bt;
+        }
+        return a;
+      }
+      /** Refreshed on every slot spin so slider→% mapping is a new random order each time. */
+      var bgVolSliderToActualPct = buildBgVolumeShuffleTable();
+
+      function bgSliderIndexToActualVolume(idx) {
+        idx = Math.max(
+          0,
+          Math.min(BG_VOL_SLIDER_MAX, Math.round(Number(idx)))
+        );
+        return bgVolSliderToActualPct[idx];
+      }
+
+      function applyBgTrackVolumeFromSlider() {
+        if (spinUseEasterEgg) return;
+        var slider = document.getElementById("bgVolSlider");
+        var label = document.getElementById("bgVolLabel");
+        if (!slider) return;
+        var pct = bgSliderIndexToActualVolume(slider.value);
+        if (label) {
+          label.textContent = "Back track: " + pct + "%";
+        }
+        if (ytBgPlayer && typeof ytBgPlayer.setVolume === "function") {
+          try {
+            ytBgPlayer.setVolume(pct);
+          } catch (eVol) {}
+        }
+      }
+
+      function createYtBgPlayerIfNeeded() {
+        if (ytBgPlayer) return;
+        if (typeof YT === "undefined" || typeof YT.Player === "undefined") {
+          return;
+        }
+        if (!document.getElementById("ytBgPlayerHost")) return;
+        ytBgPlayer = new YT.Player("ytBgPlayerHost", {
+          videoId: YT_BG_MUSIC_ID,
+          width: "560",
+          height: "315",
+          playerVars: {
+            autoplay: 1,
+            controls: 0,
+            modestbranding: 1,
+            rel: 0,
+            playsinline: 1,
+            loop: 1,
+            playlist: YT_BG_MUSIC_ID,
+          },
+          events: {
+            onReady: function (e) {
+              applyBgTrackVolumeFromSlider();
+              if (spinUseEasterEgg) {
+                try {
+                  e.target.pauseVideo();
+                } catch (eR0) {}
+              } else {
+                try {
+                  e.target.playVideo();
+                } catch (eR1) {}
+              }
+            },
+            onStateChange: function (e) {
+              if (spinUseEasterEgg) return;
+              if (e.data === YT.PlayerState.ENDED) {
+                try {
+                  e.target.playVideo();
+                } catch (eR2) {}
+              }
+            },
+          },
+        });
+      }
+
+      function createYtEggPlayerIfNeeded() {
+        if (ytEggPlayer) return;
+        if (typeof YT === "undefined" || typeof YT.Player === "undefined") {
+          return;
+        }
+        if (!document.getElementById("ytEggPlayerHost")) return;
+        ytEggPlayer = new YT.Player("ytEggPlayerHost", {
+          videoId: YT_EASTER_EGG_ID,
+          width: "560",
+          height: "315",
+          playerVars: {
+            autoplay: 0,
+            controls: 0,
+            modestbranding: 1,
+            rel: 0,
+            playsinline: 1,
+            loop: 1,
+            playlist: YT_EASTER_EGG_ID,
+          },
+          events: {
+            onReady: function (e) {
+              if (spinUseEasterEgg) {
+                try {
+                  e.target.setVolume(100);
+                  e.target.playVideo();
+                } catch (eEg0) {}
+              } else {
+                try {
+                  e.target.stopVideo();
+                } catch (eEg1) {}
+              }
+            },
+            onStateChange: function (e) {
+              if (!spinUseEasterEgg) return;
+              if (e.data === YT.PlayerState.PLAYING) {
+                try {
+                  e.target.setVolume(100);
+                } catch (eEgV) {}
+              }
+              if (e.data === YT.PlayerState.ENDED) {
+                try {
+                  e.target.playVideo();
+                } catch (eEg2) {}
+              }
+            },
+          },
+        });
+      }
+
+      function syncVolumePanelForEasterEgg() {
+        var slider = document.getElementById("bgVolSlider");
+        var label = document.getElementById("bgVolLabel");
+        var panel = document.querySelector(".bg-vol-panel");
+        if (spinUseEasterEgg) {
+          if (slider) slider.disabled = true;
+          if (label) {
+            label.textContent = "Easter egg audio: 100% (locked)";
+          }
+          if (panel) panel.classList.add("bg-vol-panel--egg-locked");
+        } else {
+          if (slider) slider.disabled = false;
+          if (panel) panel.classList.remove("bg-vol-panel--egg-locked");
+          applyBgTrackVolumeFromSlider();
+        }
+      }
+
+      window.onYouTubeIframeAPIReady = function hciYoutubeIframeApiReady() {
+        createYtBgPlayerIfNeeded();
+        createYtEggPlayerIfNeeded();
+        syncEasterEggAudio();
+      };
+
       var FLOATING_GIF_SRC =
         "https://media1.tenor.com/m/E4qukggbFgEAAAAC/jjk-hikari.gif";
 
@@ -1033,28 +1252,34 @@
         return a;
       }
 
-      function ytEmbedSrc(videoId, loop) {
-        var u =
-          "https://www.youtube.com/embed/" +
-          videoId +
-          "?autoplay=1&rel=0&controls=0&modestbranding=1";
-        if (loop) {
-          u += "&loop=1&playlist=" + videoId;
-        }
-        return u;
-      }
-
       function syncEasterEggAudio() {
-        var bgFr = document.getElementById("ytBgFrame");
-        var eggFr = document.getElementById("ytEggFrame");
-        if (!eggFr) return;
+        createYtEggPlayerIfNeeded();
         if (spinUseEasterEgg) {
-          if (bgFr) bgFr.src = "";
-          eggFr.src = ytEmbedSrc(YT_EASTER_EGG_ID, true);
+          if (ytBgPlayer && typeof ytBgPlayer.pauseVideo === "function") {
+            try {
+              ytBgPlayer.pauseVideo();
+            } catch (ePause) {}
+          }
+          if (ytEggPlayer && typeof ytEggPlayer.playVideo === "function") {
+            try {
+              ytEggPlayer.setVolume(100);
+              ytEggPlayer.playVideo();
+            } catch (eEggPlay) {}
+          }
         } else {
-          eggFr.src = "";
-          if (bgFr) bgFr.src = ytEmbedSrc(YT_BG_MUSIC_ID, true);
+          if (ytEggPlayer && typeof ytEggPlayer.stopVideo === "function") {
+            try {
+              ytEggPlayer.stopVideo();
+            } catch (eEggStop) {}
+          }
+          createYtBgPlayerIfNeeded();
+          if (ytBgPlayer && typeof ytBgPlayer.playVideo === "function") {
+            try {
+              ytBgPlayer.playVideo();
+            } catch (ePlay) {}
+          }
         }
+        syncVolumePanelForEasterEgg();
       }
 
       /** Full-page Goku photo as body background, or clear inline bg for normal CSS gradient. */
@@ -1693,6 +1918,8 @@
         spinning = true;
         spinMsg.textContent = "";
         slotKeySpam = {};
+        bgVolSliderToActualPct = buildBgVolumeShuffleTable();
+        applyBgTrackVolumeFromSlider();
 
         var maxTicks = [
           14 + Math.floor(Math.random() * 10),
@@ -1820,6 +2047,30 @@
         if (spinning) return;
         bjOpen();
       });
+
+      var bgVolSliderEl = document.getElementById("bgVolSlider");
+      if (bgVolSliderEl) {
+        bgVolSliderEl.addEventListener("input", applyBgTrackVolumeFromSlider);
+        bgVolSliderEl.addEventListener("change", applyBgTrackVolumeFromSlider);
+      }
+      applyBgTrackVolumeFromSlider();
+
+      (function injectYoutubeIframeApi() {
+        var tag = document.createElement("script");
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScript = document.getElementsByTagName("script")[0];
+        firstScript.parentNode.insertBefore(tag, firstScript);
+      })();
+
+      window.setTimeout(function () {
+        if (
+          typeof YT !== "undefined" &&
+          typeof YT.Player !== "undefined" &&
+          !ytBgPlayer
+        ) {
+          window.onYouTubeIframeAPIReady();
+        }
+      }, 0);
 
       applySpinPalette(false);
       pickNewTrigger();
