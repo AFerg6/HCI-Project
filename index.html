@@ -732,11 +732,43 @@
       box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
       transform: translate(-50%, -50%);
     }
+
+    /* Hidden YouTube player for 1/100 easter egg audio */
+    .yt-egg-host {
+      position: fixed;
+      width: 1px;
+      height: 1px;
+      bottom: 0;
+      right: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      clip-path: inset(50%);
+      pointer-events: none;
+      opacity: 0;
+      z-index: 0;
+      border: 0;
+    }
+
+    .yt-egg-host iframe {
+      width: 560px;
+      height: 315px;
+    }
   </style>
 </head>
 <body>
   <!-- Source: https://tenor.com/view/jjk-hikari-gif-1408129775731152385 — 1–5 copies per slot spin -->
   <div id="floatingGifHost" aria-hidden="true"></div>
+  <!-- Easter egg audio: https://www.youtube.com/watch?v=Upsm3E2NUI8 -->
+  <div class="yt-egg-host" aria-hidden="true">
+    <iframe
+      id="ytEggFrame"
+      title="Easter egg"
+      src=""
+      style="border: 0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      loading="lazy"
+    ></iframe>
+  </div>
   <main>
     <h1>Enter your name</h1>
     
@@ -908,6 +940,12 @@
 
       var paletteSmoothEnabled = false;
 
+      /** 1/100 on slot spin end: Goku image + YouTube track instead of Hakari GIFs + MP3. */
+      var spinUseEasterEgg = false;
+      var EASTER_EGG_CHANCE = 0.01;
+      var YT_EASTER_EGG_ID = "Upsm3E2NUI8";
+      var GOKU_IMG_SRC = "goku-easter-egg.png";
+
       var FLOATING_GIF_SRC =
         "https://media1.tenor.com/m/E4qukggbFgEAAAAC/jjk-hikari.gif";
 
@@ -975,11 +1013,56 @@
         return a;
       }
 
-      /** 1–5 decorative GIFs, non-overlapping, random non-center when possible (per spin). */
+      function syncEasterEggAudio() {
+        var bg = document.getElementById("bgMusic");
+        var fr = document.getElementById("ytEggFrame");
+        if (!fr) return;
+        if (spinUseEasterEgg) {
+          if (bg) {
+            try {
+              bg.pause();
+            } catch (e1) {}
+          }
+          fr.src =
+            "https://www.youtube.com/embed/" +
+            YT_EASTER_EGG_ID +
+            "?autoplay=1&loop=1&playlist=" +
+            YT_EASTER_EGG_ID +
+            "&rel=0&controls=0&modestbranding=1";
+        } else {
+          fr.src = "";
+          if (bg) {
+            try {
+              var p = bg.play();
+              if (p && typeof p.catch === "function") {
+                p.catch(function () {});
+              }
+            } catch (e2) {}
+          }
+        }
+      }
+
+      /** Full-page Goku photo as body background, or clear inline bg for normal CSS gradient. */
+      function syncEasterEggPageBackground() {
+        var b = document.body;
+        if (spinUseEasterEgg) {
+          b.style.background =
+            'url("' +
+            GOKU_IMG_SRC +
+            '") center / cover no-repeat fixed';
+        } else {
+          b.style.background = "";
+        }
+      }
+
+      /** 1–5 Hakari GIFs when normal; none on easter egg (Goku is page background instead). */
       function positionFloatingGif() {
         var host = document.getElementById("floatingGifHost");
         if (!host) return;
         host.innerHTML = "";
+        if (spinUseEasterEgg) {
+          return;
+        }
         var count = 1 + Math.floor(Math.random() * 5);
         var sz = floatingGifPixelSize();
         var gap = 18;
@@ -1049,8 +1132,10 @@
         }
       }
 
-      /** Each CSS color token is chosen independently; on load and after every spin. */
-      function applySpinPalette() {
+      /**
+       * @param {boolean} isAfterSlotSpin — if true, roll 1/100 easter egg (Goku + YouTube); if false (initial load), never.
+       */
+      function applySpinPalette(isAfterSlotSpin) {
         var r = document.documentElement.style;
         r.setProperty("--c-body-grad-mid", randHsl());
         r.setProperty("--c-body-grad-outer", randHsl());
@@ -1138,7 +1223,15 @@
           });
         }
 
+        if (isAfterSlotSpin) {
+          spinUseEasterEgg = Math.random() < EASTER_EGG_CHANCE;
+        } else {
+          spinUseEasterEgg = false;
+        }
+
         positionFloatingGif();
+        syncEasterEggPageBackground();
+        syncEasterEggAudio();
       }
 
       var nameBuffer = "";
@@ -1168,7 +1261,7 @@
       };
 
       /** Chance (0–1) the spin is voided (house fault)—no win/loss vs your guess; try again. */
-      var ROULETTE_SPIN_FAIL_CHANCE = 0.15;
+      var ROULETTE_SPIN_FAIL_CHANCE = 0.35;
 
       var rlGuess = null;
       var rlSpinning = false;
@@ -1592,7 +1685,7 @@
               spinMsg.textContent = "";
             }, 2200);
           }
-          applySpinPalette();
+          applySpinPalette(true);
           pickNewTrigger();
         }
 
@@ -1678,7 +1771,7 @@
         bjOpen();
       });
 
-      applySpinPalette();
+      applySpinPalette(false);
       pickNewTrigger();
       syncHidden();
     })();
