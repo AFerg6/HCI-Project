@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Name slot machine (off-diagonal)</title>
+  <style>
+    :root {
+      --c-body-grad-mid: #243047;
+      --c-body-grad-outer: #0f1419;
+      --c-body-text: #e7ecf3;
+      --c-h1: #e7ecf3;
+      --c-lede: #8b9cb3;
+      --c-lede-strong: #e7ecf3;
+      --c-kbd-bg: #e8b84a;
+      --c-kbd-fg: #0f1419;
+      --c-kbd-border: #b8892e;
+      --c-form-bg: #1a2332;
+      --c-form-border: rgba(255, 255, 255, 0.08);
+      --c-form-shadow: rgba(0, 0, 0, 0.35);
+      --c-slot-grad-top: #2a3548;
+      --c-slot-grad-mid: #0a0e14;
+      --c-slot-border: #e8b84a;
+      --c-slot-veil: rgba(10, 14, 20, 0.95);
+      --c-slot-col-border: rgba(0, 0, 0, 0.4);
+      --c-slot-inset: rgba(0, 0, 0, 0.5);
+      --c-slot-ring: rgba(255, 255, 255, 0.06);
+      --c-slot-drop: rgba(0, 0, 0, 0.45);
+      --c-reel-0: #e8b84a;
+      --c-reel-1: #e8b84a;
+      --c-reel-2: #e8b84a;
+      --c-reel-0-glow: rgba(232, 184, 74, 0.35);
+      --c-reel-1-glow: rgba(232, 184, 74, 0.35);
+      --c-reel-2-glow: rgba(232, 184, 74, 0.35);
+      --c-slot-msg: #8b9cb3;
+      --c-label: #8b9cb3;
+      --c-name-bg: #0a0e14;
+      --c-name-border: rgba(255, 255, 255, 0.1);
+      --c-name-text: #e7ecf3;
+      --c-name-ph: #8b9cb3;
+      --c-backspace-fg: #e7ecf3;
+      --c-backspace-bg: rgba(255, 255, 255, 0.08);
+      --c-backspace-border: rgba(255, 255, 255, 0.15);
+      --c-backspace-hover: rgba(255, 255, 255, 0.12);
+      --c-submit-fg: #0f1419;
+      --c-submit-grad-t: #f0c65c;
+      --c-submit-grad-b: #e8b84a;
+      --c-submit-glow: rgba(232, 184, 74, 0.35);
+      --c-hint: #8b9cb3;
+      --c-hint-strong: #e7ecf3;
+      --c-hint-kbd-bg: #3d4f63;
+      --c-hint-kbd-fg: #e7ecf3;
+      --c-hint-kbd-border: rgba(255, 255, 255, 0.2);
+      --c-output-bg: rgba(0, 0, 0, 0.25);
+      --c-output-border: rgba(232, 184, 74, 0.25);
+      --c-output-text: #e7ecf3;
+      --c-bj-backdrop: rgba(5, 8, 12, 0.72);
+      --c-bj-modal-bg: #1a2332;
+      --c-bj-modal-border: rgba(255, 255, 255, 0.12);
+      --c-bj-modal-shadow: rgba(0, 0, 0, 0.55);
+      --c-bj-h2: #e7ecf3;
+      --c-bj-sub: #8b9cb3;
+      --c-bj-rule: #8b9cb3;
+      --c-bj-score: #e7ecf3;
+      --c-bj-status: #e7ecf3;
+      --c-bj-card-t: #f8fafc;
+      --c-bj-card-b: #e2e8f0;
+      --c-bj-card-fg: #0f172a;
+      --c-bj-card-border: rgba(0, 0, 0, 0.12);
+      --c-bj-card-shadow: rgba(0, 0, 0, 0.25);
+      --c-bj-red: #b91c1c;
+      --c-bj-hole-a: #1e3a5f;
+      --c-bj-hole-b: #0f1419;
+      --c-bj-hole-border: #e8b84a;
+      --c-bjh-fg: #e7ecf3;
+      --c-bjh-bg: rgba(255, 255, 255, 0.08);
+      --c-bjh-border: rgba(255, 255, 255, 0.15);
+      --c-bjs-fg: #e7ecf3;
+      --c-bjs-bg: rgba(255, 255, 255, 0.08);
+      --c-bjs-border: rgba(255, 255, 255, 0.15);
+      --c-bjn-fg: #e7ecf3;
+      --c-bjn-bg: rgba(255, 255, 255, 0.08);
+      --c-bjn-border: rgba(255, 255, 255, 0.15);
+      --c-bjc-fg: #e7ecf3;
+      --c-bjc-bg: rgba(255, 255, 255, 0.08);
+      --c-bjc-border: rgba(255, 255, 255, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: radial-gradient(
+        ellipse 120% 80% at 50% -20%,
+        var(--c-body-grad-mid) 0%,
+        var(--c-body-grad-outer) 55%
+      );
+      color: var(--c-body-text);
+      padding: 2rem 1.25rem 3rem;
+      line-height: 1.5;
+    }
+
+    main {
+      max-width: 36rem;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 650;
+      margin: 0 0 0.35rem;
+      letter-spacing: -0.02em;
+      color: var(--c-h1);
+    }
+
+    .lede {
+      color: var(--c-lede);
+      font-size: 0.95rem;
+      margin: 0 0 1.75rem;
+    }
+
+    .lede strong {
+      color: var(--c-lede-strong);
+    }
+
+    .lede kbd {
+      font-family: ui-monospace, "Cascadia Code", monospace;
+      font-size: 0.88em;
+      padding: 0.12rem 0.4rem;
+      border-radius: 4px;
+      background: var(--c-kbd-bg);
+      color: var(--c-kbd-fg);
+      border-bottom: 2px solid var(--c-kbd-border);
+    }
+
+    form {
+      background: var(--c-form-bg);
+      border: 1px solid var(--c-form-border);
+      border-radius: 14px;
+      padding: 1.5rem 1.35rem 1.35rem;
+      box-shadow: 0 18px 50px var(--c-form-shadow);
+    }
+
+    .slot-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .slot-machine {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      width: auto;
+      min-width: 10.5rem;
+      height: 6.5rem;
+      background: linear-gradient(
+        180deg,
+        var(--c-slot-grad-top) 0%,
+        var(--c-slot-grad-mid) 40%,
+        var(--c-slot-grad-mid) 60%,
+        var(--c-slot-grad-top) 100%
+      );
+      border: 3px solid var(--c-slot-border);
+      border-radius: 10px;
+      box-shadow:
+        inset 0 0 0 2px var(--c-slot-inset),
+        0 0 0 1px var(--c-slot-ring),
+        0 8px 24px var(--c-slot-drop);
+      overflow: hidden;
+    }
+
+    .slot-machine::before,
+    .slot-machine::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 28%;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .slot-machine::before {
+      top: 0;
+      background: linear-gradient(180deg, var(--c-slot-veil), transparent);
+    }
+
+    .slot-machine::after {
+      bottom: 0;
+      background: linear-gradient(0deg, var(--c-slot-veil), transparent);
+    }
+
+    .reel-column {
+      flex: 1;
+      position: relative;
+      min-width: 2.65rem;
+      max-width: 3.15rem;
+      border-right: 2px solid var(--c-slot-col-border);
+      z-index: 1;
+    }
+
+    .reel-column:last-child {
+      border-right: none;
+    }
+
+    .reel-window {
+      position: absolute;
+      inset: 22% 6%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+
+    .reel-char {
+      font-size: 2.35rem;
+      font-weight: 800;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      user-select: none;
+    }
+
+    #reelChar0 {
+      color: var(--c-reel-0);
+      text-shadow: 0 0 20px var(--c-reel-0-glow);
+    }
+
+    #reelChar1 {
+      color: var(--c-reel-1);
+      text-shadow: 0 0 20px var(--c-reel-1-glow);
+    }
+
+    #reelChar2 {
+      color: var(--c-reel-2);
+      text-shadow: 0 0 20px var(--c-reel-2-glow);
+    }
+
+    .reel-char.spinning {
+      animation: reel-shake 0.08s steps(2) infinite;
+      filter: blur(0.5px);
+    }
+
+    @keyframes reel-shake {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(2px);
+      }
+    }
+
+    .slot-msg {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--c-slot-msg);
+      min-height: 1.35rem;
+      margin: 0.35rem 0 0;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--c-label);
+      margin-bottom: 0.35rem;
+    }
+
+    .name-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: stretch;
+      margin-bottom: 1rem;
+    }
+
+    .name-display {
+      flex: 1;
+      min-height: 2.75rem;
+      padding: 0.65rem 0.85rem;
+      background: var(--c-name-bg);
+      border: 1px solid var(--c-name-border);
+      border-radius: 8px;
+      font-size: 1.15rem;
+      letter-spacing: 0.04em;
+      word-break: break-all;
+      color: var(--c-name-text);
+    }
+
+    .name-display:empty::before {
+      content: "(empty)";
+      color: var(--c-name-ph);
+      letter-spacing: normal;
+    }
+
+    #backspaceBtn {
+      padding: 0 0.85rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--c-backspace-fg);
+      background: var(--c-backspace-bg);
+      border: 1px solid var(--c-backspace-border);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #backspaceBtn:hover {
+      background: var(--c-backspace-hover);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      align-items: center;
+    }
+
+    button[type="submit"] {
+      padding: 0.65rem 1.25rem;
+      font-size: 1rem;
+      font-weight: 650;
+      color: var(--c-submit-fg);
+      background: linear-gradient(180deg, var(--c-submit-grad-t), var(--c-submit-grad-b));
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px var(--c-submit-glow);
+    }
+
+    button[type="submit"]:hover {
+      filter: brightness(1.05);
+    }
+
+    .hint {
+      font-size: 0.82rem;
+      color: var(--c-hint);
+      margin: 0.75rem 0 0;
+    }
+
+    .hint strong {
+      color: var(--c-hint-strong);
+    }
+
+    .hint kbd {
+      font-family: ui-monospace, "Cascadia Code", monospace;
+      font-size: 0.88em;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      background: var(--c-hint-kbd-bg);
+      color: var(--c-hint-kbd-fg);
+      border: 1px solid var(--c-hint-kbd-border);
+    }
+
+    output {
+      display: block;
+      margin-top: 1rem;
+      padding: 0.85rem;
+      background: var(--c-output-bg);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      border: 1px solid var(--c-output-border);
+      color: var(--c-output-text);
+    }
+
+    output:empty {
+      display: none;
+    }
+
+    .bj-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: var(--c-bj-backdrop);
+      backdrop-filter: blur(4px);
+    }
+
+    .bj-backdrop[hidden] {
+      display: none !important;
+    }
+
+    .bj-modal {
+      width: 100%;
+      max-width: 22rem;
+      background: var(--c-bj-modal-bg);
+      border: 1px solid var(--c-bj-modal-border);
+      border-radius: 14px;
+      padding: 1.25rem 1.2rem 1.1rem;
+      box-shadow: 0 24px 60px var(--c-bj-modal-shadow);
+    }
+
+    .bj-modal h2 {
+      margin: 0 0 0.35rem;
+      font-size: 1.1rem;
+      font-weight: 650;
+      color: var(--c-bj-h2);
+    }
+
+    .bj-sub {
+      margin: 0 0 1rem;
+      font-size: 0.82rem;
+      color: var(--c-bj-sub);
+    }
+
+    .bj-table {
+      margin-bottom: 0.85rem;
+    }
+
+    .bj-table > div:first-of-type,
+    .bj-table > div:nth-of-type(3) {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--c-bj-rule);
+      margin-top: 0.65rem;
+    }
+
+    .bj-table > div:first-of-type {
+      margin-top: 0;
+    }
+
+    .bj-score {
+      font-weight: 600;
+      color: var(--c-bj-score);
+      margin-left: 0.25rem;
+    }
+
+    .bj-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.35rem;
+      min-height: 3.1rem;
+    }
+
+    .bj-card {
+      width: 2.35rem;
+      height: 3.1rem;
+      border-radius: 6px;
+      background: linear-gradient(180deg, var(--c-bj-card-t) 0%, var(--c-bj-card-b) 100%);
+      color: var(--c-bj-card-fg);
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.05;
+      box-shadow: 0 2px 6px var(--c-bj-card-shadow);
+      border: 1px solid var(--c-bj-card-border);
+    }
+
+    .bj-card.red {
+      color: var(--c-bj-red);
+    }
+
+    .bj-card.hole {
+      background: linear-gradient(135deg, var(--c-bj-hole-a), var(--c-bj-hole-b));
+      color: transparent;
+      border-color: var(--c-bj-hole-border);
+    }
+
+    .bj-card .suit {
+      font-size: 0.75rem;
+      margin-top: 0.1rem;
+    }
+
+    .bj-status {
+      min-height: 2.6rem;
+      margin: 0 0 0.85rem;
+      font-size: 0.9rem;
+      color: var(--c-bj-status);
+    }
+
+    .bj-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .bj-actions button[type="button"] {
+      flex: 1;
+      min-width: 5rem;
+      padding: 0.5rem 0.65rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #bjHit {
+      color: var(--c-bjh-fg);
+      background: var(--c-bjh-bg);
+      border: 1px solid var(--c-bjh-border);
+    }
+
+    #bjStand {
+      color: var(--c-bjs-fg);
+      background: var(--c-bjs-bg);
+      border: 1px solid var(--c-bjs-border);
+    }
+
+    #bjNewHand {
+      color: var(--c-bjn-fg);
+      background: var(--c-bjn-bg);
+      border: 1px solid var(--c-bjn-border);
+    }
+
+    #bjClose {
+      color: var(--c-bjc-fg);
+      background: var(--c-bjc-bg);
+      border: 1px solid var(--c-bjc-border);
+    }
+
+    .bj-actions #bjClose {
+      flex: 1 1 100%;
+      margin-top: 0.15rem;
+    }
+
+    .bj-actions .is-hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Build your name on the slot machine</h1>
+    <p class="lede">
+      <strong>Off-diagonal:</strong> a quantifier-style gamble (reels) used for
+      <strong>language</strong> (letters). Three reels spin like a slot machine; when they pay
+      out, one character is added. Each reel can miss independently (same odds); you only get a
+      letter if <strong>all three</strong> hit. A spin is
+      started from the keyboard, but <strong>which</strong> key is not shown—it changes after
+      each spin. <kbd>Enter</kbd> only submits.
+    </p>
+
+    <form id="nameForm" action="" method="get">
+      <div class="slot-wrap">
+        <div class="slot-machine" aria-hidden="true">
+          <div class="reel-column">
+            <div class="reel-window">
+              <span class="reel-char" id="reelChar0">★</span>
+            </div>
+          </div>
+          <div class="reel-column">
+            <div class="reel-window">
+              <span class="reel-char" id="reelChar1">★</span>
+            </div>
+          </div>
+          <div class="reel-column">
+            <div class="reel-window">
+              <span class="reel-char" id="reelChar2">★</span>
+            </div>
+          </div>
+        </div>
+        <p class="slot-msg" id="spinMsg" aria-live="polite"></p>
+      </div>
+
+      <label for="nameDisplay">Your name (read-only build)</label>
+      <div class="name-row">
+        <div id="nameDisplay" class="name-display" role="status" aria-live="polite"></div>
+        <button type="button" id="backspaceBtn" title="Remove last character">⌫</button>
+      </div>
+
+      <input type="hidden" name="name" id="nameHidden" value="" />
+
+      <div class="actions">
+        <button type="submit">Submit name (Enter)</button>
+      </div>
+      <p class="hint">
+        Only the ⌫ button can remove letters: it opens blackjack, and you lose a character only if you
+        <strong>win</strong> the hand. The <kbd>Backspace</kbd> key does nothing here. While spinning,
+        keys are ignored until the reels stop.
+      </p>
+
+      <output id="result" for="nameForm"></output>
+    </form>
+  </main>
+
+  <div id="bjBackdrop" class="bj-backdrop" hidden>
+    <div
+      class="bj-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="bjTitle"
+    >
+      <h2 id="bjTitle">Blackjack — win to delete</h2>
+      <p class="bj-sub">
+        The ⌫ button won’t remove a letter unless you <strong>win</strong> the hand. Dealer
+        stands on 17. Blackjack pays as a win (unless push).
+      </p>
+      <div class="bj-table">
+        <div>Dealer <span id="dealerScore" class="bj-score"></span></div>
+        <div id="dealerCards" class="bj-cards"></div>
+        <div>You <span id="playerScore" class="bj-score"></span></div>
+        <div id="playerCards" class="bj-cards"></div>
+      </div>
+      <p id="bjStatus" class="bj-status" aria-live="polite"></p>
+      <div class="bj-actions">
+        <button type="button" id="bjHit">Hit</button>
+        <button type="button" id="bjStand">Stand</button>
+        <button type="button" id="bjNewHand" class="is-hidden">New hand</button>
+        <button type="button" id="bjClose">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      /** Keys that may start a spin (Enter is never chosen). */
+      var TRIGGER_POOL = "abcdefghijklmnopqrstuvwxyz0123456789".split("");
+
+      /** Symbols the reel can land on (name-friendly subset). */
+      var SLOT_CHARS =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz -'.".split("");
+
+      var form = document.getElementById("nameForm");
+      var nameDisplay = document.getElementById("nameDisplay");
+      var nameHidden = document.getElementById("nameHidden");
+      var reelEls = [
+        document.getElementById("reelChar0"),
+        document.getElementById("reelChar1"),
+        document.getElementById("reelChar2"),
+      ];
+      var spinMsg = document.getElementById("spinMsg");
+      /** Per-reel chance (0–1) that this reel “misses”; full payout needs all three to hit. */
+      var SPIN_FAIL_CHANCE = 0.05;
+      var result = document.getElementById("result");
+      var backspaceBtn = document.getElementById("backspaceBtn");
+      var bjBackdrop = document.getElementById("bjBackdrop");
+      var bjDealerCards = document.getElementById("dealerCards");
+      var bjPlayerCards = document.getElementById("playerCards");
+      var bjDealerScore = document.getElementById("dealerScore");
+      var bjPlayerScore = document.getElementById("playerScore");
+      var bjStatus = document.getElementById("bjStatus");
+      var bjHit = document.getElementById("bjHit");
+      var bjStand = document.getElementById("bjStand");
+      var bjNewHand = document.getElementById("bjNewHand");
+      var bjCloseBtn = document.getElementById("bjClose");
+
+      function randHsl() {
+        return (
+          "hsl(" +
+          Math.floor(Math.random() * 360) +
+          ", " +
+          (42 + Math.floor(Math.random() * 58)) +
+          "%, " +
+          (10 + Math.floor(Math.random() * 72)) +
+          "%)"
+        );
+      }
+
+      function randHsla(alpha) {
+        return (
+          "hsla(" +
+          Math.floor(Math.random() * 360) +
+          ", " +
+          (42 + Math.floor(Math.random() * 58)) +
+          "%, " +
+          (12 + Math.floor(Math.random() * 65)) +
+          "%, " +
+          alpha +
+          ")"
+        );
+      }
+
+      /** Each CSS color token is chosen independently; on load and after every spin. */
+      function applySpinPalette() {
+        var r = document.documentElement.style;
+        r.setProperty("--c-body-grad-mid", randHsl());
+        r.setProperty("--c-body-grad-outer", randHsl());
+        r.setProperty("--c-body-text", randHsl());
+        r.setProperty("--c-h1", randHsl());
+        r.setProperty("--c-lede", randHsl());
+        r.setProperty("--c-lede-strong", randHsl());
+        r.setProperty("--c-kbd-bg", randHsl());
+        r.setProperty("--c-kbd-fg", randHsl());
+        r.setProperty("--c-kbd-border", randHsl());
+        r.setProperty("--c-form-bg", randHsl());
+        r.setProperty("--c-form-border", randHsla(0.32));
+        r.setProperty("--c-form-shadow", randHsla(0.42));
+        r.setProperty("--c-slot-grad-top", randHsl());
+        r.setProperty("--c-slot-grad-mid", randHsl());
+        r.setProperty("--c-slot-border", randHsl());
+        r.setProperty("--c-slot-veil", randHsla(0.94));
+        r.setProperty("--c-slot-col-border", randHsla(0.55));
+        r.setProperty("--c-slot-inset", randHsla(0.55));
+        r.setProperty("--c-slot-ring", randHsla(0.18));
+        r.setProperty("--c-slot-drop", randHsla(0.48));
+        r.setProperty("--c-reel-0", randHsl());
+        r.setProperty("--c-reel-1", randHsl());
+        r.setProperty("--c-reel-2", randHsl());
+        r.setProperty("--c-reel-0-glow", randHsla(0.42));
+        r.setProperty("--c-reel-1-glow", randHsla(0.42));
+        r.setProperty("--c-reel-2-glow", randHsla(0.42));
+        r.setProperty("--c-slot-msg", randHsl());
+        r.setProperty("--c-label", randHsl());
+        r.setProperty("--c-name-bg", randHsl());
+        r.setProperty("--c-name-border", randHsla(0.28));
+        r.setProperty("--c-name-text", randHsl());
+        r.setProperty("--c-name-ph", randHsl());
+        r.setProperty("--c-backspace-fg", randHsl());
+        r.setProperty("--c-backspace-bg", randHsla(0.2));
+        r.setProperty("--c-backspace-border", randHsla(0.32));
+        r.setProperty("--c-backspace-hover", randHsla(0.28));
+        r.setProperty("--c-submit-fg", randHsl());
+        r.setProperty("--c-submit-grad-t", randHsl());
+        r.setProperty("--c-submit-grad-b", randHsl());
+        r.setProperty("--c-submit-glow", randHsla(0.38));
+        r.setProperty("--c-hint", randHsl());
+        r.setProperty("--c-hint-strong", randHsl());
+        r.setProperty("--c-hint-kbd-bg", randHsl());
+        r.setProperty("--c-hint-kbd-fg", randHsl());
+        r.setProperty("--c-hint-kbd-border", randHsla(0.35));
+        r.setProperty("--c-output-bg", randHsla(0.32));
+        r.setProperty("--c-output-border", randHsla(0.4));
+        r.setProperty("--c-output-text", randHsl());
+        r.setProperty("--c-bj-backdrop", randHsla(0.74));
+        r.setProperty("--c-bj-modal-bg", randHsl());
+        r.setProperty("--c-bj-modal-border", randHsla(0.35));
+        r.setProperty("--c-bj-modal-shadow", randHsla(0.52));
+        r.setProperty("--c-bj-h2", randHsl());
+        r.setProperty("--c-bj-sub", randHsl());
+        r.setProperty("--c-bj-rule", randHsl());
+        r.setProperty("--c-bj-score", randHsl());
+        r.setProperty("--c-bj-status", randHsl());
+        r.setProperty("--c-bj-card-t", randHsl());
+        r.setProperty("--c-bj-card-b", randHsl());
+        r.setProperty("--c-bj-card-fg", randHsl());
+        r.setProperty("--c-bj-card-border", randHsla(0.3));
+        r.setProperty("--c-bj-card-shadow", randHsla(0.38));
+        r.setProperty("--c-bj-red", randHsl());
+        r.setProperty("--c-bj-hole-a", randHsl());
+        r.setProperty("--c-bj-hole-b", randHsl());
+        r.setProperty("--c-bj-hole-border", randHsl());
+        r.setProperty("--c-bjh-fg", randHsl());
+        r.setProperty("--c-bjh-bg", randHsla(0.22));
+        r.setProperty("--c-bjh-border", randHsla(0.35));
+        r.setProperty("--c-bjs-fg", randHsl());
+        r.setProperty("--c-bjs-bg", randHsla(0.22));
+        r.setProperty("--c-bjs-border", randHsla(0.35));
+        r.setProperty("--c-bjn-fg", randHsl());
+        r.setProperty("--c-bjn-bg", randHsla(0.22));
+        r.setProperty("--c-bjn-border", randHsla(0.35));
+        r.setProperty("--c-bjc-fg", randHsl());
+        r.setProperty("--c-bjc-bg", randHsla(0.22));
+        r.setProperty("--c-bjc-border", randHsla(0.35));
+      }
+
+      var nameBuffer = "";
+      var spinning = false;
+      var currentTrigger = "";
+
+      function randomTrigger() {
+        var i = Math.floor(Math.random() * TRIGGER_POOL.length);
+        return TRIGGER_POOL[i];
+      }
+
+      function setTrigger(key) {
+        currentTrigger = key;
+      }
+
+      function pickNewTrigger() {
+        var next;
+        do {
+          next = randomTrigger();
+        } while (next === currentTrigger && TRIGGER_POOL.length > 1);
+        setTrigger(next);
+      }
+
+      function syncHidden() {
+        nameHidden.value = nameBuffer;
+        nameDisplay.textContent = nameBuffer;
+      }
+
+      /* --- Blackjack (⌫ button): win a hand to delete one character --- */
+      var BJ_SUITS = [
+        { sym: "♠", red: false },
+        { sym: "♥", red: true },
+        { sym: "♦", red: true },
+        { sym: "♣", red: false },
+      ];
+      var BJ_RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+
+      var bjDeck = [];
+      var bjPlayer = [];
+      var bjDealer = [];
+      var bjPhase = "idle";
+      var bjHoleHidden = true;
+
+      function bjCreateDeck() {
+        var d = [];
+        for (var s = 0; s < BJ_SUITS.length; s++) {
+          for (var r = 0; r < BJ_RANKS.length; r++) {
+            d.push({
+              rank: BJ_RANKS[r],
+              suit: BJ_SUITS[s].sym,
+              red: BJ_SUITS[s].red,
+            });
+          }
+        }
+        return d;
+      }
+
+      function bjShuffle(a) {
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = a[i];
+          a[i] = a[j];
+          a[j] = t;
+        }
+        return a;
+      }
+
+      function bjHandValue(cards) {
+        var total = 0;
+        var aces = 0;
+        for (var i = 0; i < cards.length; i++) {
+          var rank = cards[i].rank;
+          if (rank === "A") {
+            aces++;
+            total += 11;
+          } else if (rank === "J" || rank === "Q" || rank === "K") {
+            total += 10;
+          } else {
+            total += parseInt(rank, 10);
+          }
+        }
+        while (total > 21 && aces > 0) {
+          total -= 10;
+          aces--;
+        }
+        return total;
+      }
+
+      function bjIsBlackjack(cards) {
+        return cards.length === 2 && bjHandValue(cards) === 21;
+      }
+
+      function bjDraw() {
+        if (bjDeck.length < 8) {
+          bjDeck = bjShuffle(bjCreateDeck());
+        }
+        return bjDeck.pop();
+      }
+
+      function bjCardEl(card, isHole) {
+        var el = document.createElement("div");
+        el.className = "bj-card";
+        if (isHole) {
+          el.className = "bj-card hole";
+          el.setAttribute("aria-label", "Hidden card");
+        } else {
+          if (card.red) el.classList.add("red");
+          el.innerHTML =
+            "<span>" +
+            card.rank +
+            '</span><span class="suit">' +
+            card.suit +
+            "</span>";
+        }
+        return el;
+      }
+
+      function bjRender() {
+        bjDealerCards.innerHTML = "";
+        bjPlayerCards.innerHTML = "";
+        for (var i = 0; i < bjDealer.length; i++) {
+          var hole = bjHoleHidden && i === 1;
+          bjDealerCards.appendChild(bjCardEl(bjDealer[i], hole));
+        }
+        for (var j = 0; j < bjPlayer.length; j++) {
+          bjPlayerCards.appendChild(bjCardEl(bjPlayer[j], false));
+        }
+        if (bjHoleHidden && bjDealer.length > 0) {
+          bjDealerScore.textContent =
+            bjDealer.length > 1 ? String(bjHandValue([bjDealer[0]])) + " + ?" : String(bjHandValue(bjDealer));
+        } else {
+          bjDealerScore.textContent = String(bjHandValue(bjDealer));
+        }
+        bjPlayerScore.textContent = String(bjHandValue(bjPlayer));
+      }
+
+      function bjFinish(outcome, msg) {
+        bjPhase = "done";
+        bjHoleHidden = false;
+        bjRender();
+        if (outcome === "win") {
+          nameBuffer = nameBuffer.slice(0, -1);
+          syncHidden();
+        }
+        bjStatus.textContent = msg;
+        bjHit.classList.add("is-hidden");
+        bjStand.classList.add("is-hidden");
+        bjNewHand.classList.remove("is-hidden");
+      }
+
+      function bjDealInitial() {
+        bjDeck = bjShuffle(bjCreateDeck());
+        bjPlayer = [bjDraw(), bjDraw()];
+        bjDealer = [bjDraw(), bjDraw()];
+        bjHoleHidden = true;
+        bjPhase = "player";
+        bjStatus.textContent = "Hit or stand.";
+        bjHit.classList.remove("is-hidden");
+        bjStand.classList.remove("is-hidden");
+        bjNewHand.classList.add("is-hidden");
+
+        var pN = bjIsBlackjack(bjPlayer);
+        var dN = bjIsBlackjack(bjDealer);
+
+        if (pN && dN) {
+          bjFinish("push", "Both blackjack — push. No letter removed.");
+          return;
+        }
+        if (pN) {
+          bjFinish("win", "Blackjack! Last character removed.");
+          return;
+        }
+        if (dN) {
+          bjFinish("lose", "Dealer blackjack — you lose.");
+          return;
+        }
+        bjRender();
+      }
+
+      function bjOpen() {
+        if (!nameBuffer.length) return;
+        bjBackdrop.hidden = false;
+        bjDealInitial();
+        bjHit.focus();
+      }
+
+      function closeBjModal() {
+        bjBackdrop.hidden = true;
+      }
+
+      bjHit.addEventListener("click", function () {
+        if (bjPhase !== "player") return;
+        bjPlayer.push(bjDraw());
+        bjRender();
+        if (bjHandValue(bjPlayer) > 21) {
+          bjFinish("lose", "Bust — you lose.");
+        }
+      });
+
+      bjStand.addEventListener("click", function () {
+        if (bjPhase !== "player") return;
+        bjHoleHidden = false;
+        bjRender();
+        while (bjHandValue(bjDealer) < 17) {
+          bjDealer.push(bjDraw());
+        }
+        bjRender();
+        var pv = bjHandValue(bjPlayer);
+        var dv = bjHandValue(bjDealer);
+        if (dv > 21) {
+          bjFinish("win", "Dealer busts — you win. Last character removed.");
+        } else if (pv > dv) {
+          bjFinish("win", "You beat the dealer. Last character removed.");
+        } else if (pv < dv) {
+          bjFinish("lose", "Dealer wins.");
+        } else {
+          bjFinish("push", "Push. No letter removed.");
+        }
+      });
+
+      bjNewHand.addEventListener("click", function () {
+        if (!nameBuffer.length) {
+          closeBjModal();
+          return;
+        }
+        bjDealInitial();
+        bjHit.focus();
+      });
+
+      bjCloseBtn.addEventListener("click", closeBjModal);
+      bjBackdrop.addEventListener("click", function (e) {
+        if (e.target === bjBackdrop) closeBjModal();
+      });
+
+      function finalChar() {
+        return SLOT_CHARS[Math.floor(Math.random() * SLOT_CHARS.length)];
+      }
+
+      function charNot(avoid) {
+        var c;
+        var tries = 0;
+        do {
+          c = finalChar();
+          tries++;
+        } while (c === avoid && tries < 64 && SLOT_CHARS.length > 1);
+        return c;
+      }
+
+      function runSpin() {
+        if (spinning) return;
+        spinning = true;
+        spinMsg.textContent = "";
+
+        var payoutChar = finalChar();
+        var reelHit = [
+          Math.random() >= SPIN_FAIL_CHANCE,
+          Math.random() >= SPIN_FAIL_CHANCE,
+          Math.random() >= SPIN_FAIL_CHANCE,
+        ];
+        var fullPayout = reelHit[0] && reelHit[1] && reelHit[2];
+        var land = [
+          reelHit[0] ? payoutChar : charNot(payoutChar),
+          reelHit[1] ? payoutChar : charNot(payoutChar),
+          reelHit[2] ? payoutChar : charNot(payoutChar),
+        ];
+
+        var maxTicks = [
+          14 + Math.floor(Math.random() * 10),
+          22 + Math.floor(Math.random() * 10),
+          30 + Math.floor(Math.random() * 12),
+        ];
+
+        var remaining = 3;
+
+        function onReelStopped() {
+          remaining--;
+          if (remaining > 0) return;
+          spinning = false;
+          if (fullPayout) {
+            nameBuffer += payoutChar;
+            syncHidden();
+          } else {
+            spinMsg.textContent = "No payout — one or more reels missed.";
+            window.setTimeout(function () {
+              spinMsg.textContent = "";
+            }, 2200);
+          }
+          applySpinPalette();
+          pickNewTrigger();
+        }
+
+        function spinReel(index) {
+          var el = reelEls[index];
+          var ticks = 0;
+          var interval = 42;
+          var cap = maxTicks[index];
+
+          el.classList.add("spinning");
+
+          function tick() {
+            ticks++;
+            if (ticks < cap) {
+              el.textContent = SLOT_CHARS[Math.floor(Math.random() * SLOT_CHARS.length)];
+              interval += 3 + Math.floor(ticks / 6) * 5;
+              window.setTimeout(tick, interval);
+              return;
+            }
+            el.classList.remove("spinning");
+            el.textContent = land[index];
+            onReelStopped();
+          }
+
+          window.setTimeout(tick, interval);
+        }
+
+        spinReel(0);
+        spinReel(1);
+        spinReel(2);
+      }
+
+      function keyMatchesTrigger(e) {
+        if (currentTrigger >= "0" && currentTrigger <= "9") {
+          return e.key === currentTrigger;
+        }
+        return e.key.length === 1 && e.key.toLowerCase() === currentTrigger;
+      }
+
+      document.addEventListener("keydown", function (e) {
+        if (!bjBackdrop.hidden) {
+          if (e.key === "Enter") e.preventDefault();
+          if (e.key === "Backspace") e.preventDefault();
+          if (e.key === "Escape") {
+            e.preventDefault();
+            closeBjModal();
+          }
+          return;
+        }
+
+        if (e.key === "Enter") {
+          if (spinning) {
+            e.preventDefault();
+            return;
+          }
+          e.preventDefault();
+          form.requestSubmit();
+          return;
+        }
+
+        if (e.key === "Backspace") {
+          e.preventDefault();
+          return;
+        }
+
+        if (spinning) return;
+
+        if (keyMatchesTrigger(e)) {
+          e.preventDefault();
+          runSpin();
+        }
+      });
+
+      backspaceBtn.addEventListener("click", function () {
+        if (spinning) return;
+        bjOpen();
+      });
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var q = nameBuffer.trim();
+        result.textContent = q
+          ? "Submitted (demo): “" + q + "”. In a real app this would POST; here nothing leaves your machine."
+          : "Submitted empty name — spin a few times first if you want letters.";
+      });
+
+      applySpinPalette();
+      pickNewTrigger();
+      syncHidden();
+    })();
+  </script>
+</body>
+</html>
