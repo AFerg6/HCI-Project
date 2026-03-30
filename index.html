@@ -90,6 +90,24 @@
       box-sizing: border-box;
     }
 
+    /* After first applySpinPalette(), theme tokens ease instead of snapping. */
+    html.palette-smooth *:not(.rl-wheel),
+    html.palette-smooth *:not(.rl-wheel)::before,
+    html.palette-smooth *:not(.rl-wheel)::after {
+      transition-property: color, background-color, border-color, box-shadow, text-shadow, background,
+        outline-color, fill, stroke;
+      transition-duration: 0.9s;
+      transition-timing-function: ease;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html.palette-smooth *:not(.rl-wheel),
+      html.palette-smooth *:not(.rl-wheel)::before,
+      html.palette-smooth *:not(.rl-wheel)::after {
+        transition-duration: 0.01ms !important;
+      }
+    }
+
     body {
       margin: 0;
       min-height: 100vh;
@@ -322,7 +340,8 @@
       align-items: center;
     }
 
-    button[type="submit"] {
+    button[type="submit"],
+    #submitBtn {
       padding: 0.65rem 1.25rem;
       font-size: 1rem;
       font-weight: 650;
@@ -334,7 +353,8 @@
       box-shadow: 0 4px 14px var(--c-submit-glow);
     }
 
-    button[type="submit"]:hover {
+    button[type="submit"]:hover,
+    #submitBtn:hover {
       filter: brightness(1.05);
     }
 
@@ -530,19 +550,196 @@
     .bj-actions .is-hidden {
       display: none !important;
     }
+
+    /* --- Roulette (submit gate) --- */
+    .rl-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 1010;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(4, 6, 10, 0.82);
+      backdrop-filter: blur(5px);
+    }
+
+    .rl-backdrop[hidden] {
+      display: none !important;
+    }
+
+    .rl-modal {
+      width: 100%;
+      max-width: 22rem;
+      background: #141a22;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 14px;
+      padding: 1.2rem 1.15rem 1.1rem;
+      box-shadow: 0 28px 64px rgba(0, 0, 0, 0.6);
+      color: #e8ecf4;
+    }
+
+    .rl-modal h2 {
+      margin: 0 0 0.35rem;
+      font-size: 1.08rem;
+      font-weight: 650;
+    }
+
+    .rl-sub {
+      margin: 0 0 0.85rem;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      line-height: 1.45;
+    }
+
+    .rl-pick {
+      display: flex;
+      gap: 0.45rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .rl-bet {
+      flex: 1;
+      min-width: 4.5rem;
+      padding: 0.55rem 0.5rem;
+      font-size: 0.88rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      color: #fff;
+    }
+
+    .rl-bet[data-color="red"] {
+      background: linear-gradient(180deg, #dc2626, #991b1b);
+    }
+
+    .rl-bet[data-color="black"] {
+      background: linear-gradient(180deg, #374151, #111827);
+    }
+
+    .rl-bet[data-color="green"] {
+      background: linear-gradient(180deg, #16a34a, #14532d);
+    }
+
+    .rl-bet.is-selected {
+      box-shadow: 0 0 0 2px #fbbf24, 0 0 18px rgba(251, 191, 36, 0.35);
+      border-color: rgba(255, 255, 255, 0.35);
+    }
+
+    .rl-bet:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .rl-wheel-wrap {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      margin: 0 auto 1rem;
+    }
+
+    .rl-pointer {
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 12px solid transparent;
+      border-right: 12px solid transparent;
+      border-top: 22px solid #fbbf24;
+      z-index: 3;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    }
+
+    .rl-wheel {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      box-shadow:
+        inset 0 0 0 6px #2d3748,
+        inset 0 0 0 8px #1a202c,
+        0 8px 28px rgba(0, 0, 0, 0.55);
+      transform-origin: 50% 50%;
+      position: relative;
+      z-index: 1;
+    }
+
+    .rl-hub {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 36px;
+      height: 36px;
+      margin: -18px 0 0 -18px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #f8fafc, #94a3b8);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .rl-status {
+      min-height: 2.4rem;
+      margin: 0 0 0.75rem;
+      font-size: 0.88rem;
+      text-align: center;
+    }
+
+    .rl-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .rl-actions button[type="button"] {
+      padding: 0.55rem 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    #rlSpin {
+      background: linear-gradient(180deg, #d4a012, #b45309);
+      color: #1a0f00;
+      border-color: rgba(0, 0, 0, 0.25);
+    }
+
+    #rlSpin:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    #rlCancel {
+      background: rgba(255, 255, 255, 0.06);
+      color: #e2e8f0;
+    }
+
+    /* Decorative GIF: never receives clicks; below modals (z-index 1000+). */
+    .floating-gif {
+      position: fixed;
+      z-index: 60;
+      max-width: min(200px, 26vw);
+      width: min(200px, 26vw);
+      height: auto;
+      pointer-events: none;
+      user-select: none;
+      border-radius: 10px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+      transform: translate(-50%, -50%);
+    }
   </style>
 </head>
 <body>
+  <!-- Source: https://tenor.com/view/jjk-hikari-gif-1408129775731152385 — 1–5 copies per slot spin -->
+  <div id="floatingGifHost" aria-hidden="true"></div>
   <main>
-    <h1>Build your name on the slot machine</h1>
-    <p class="lede">
-      <strong>Off-diagonal:</strong> a quantifier-style gamble (reels) used for
-      <strong>language</strong> (letters). Three reels spin like a slot machine; when they pay
-      out, one character is added. Each reel can miss independently (same odds); you only get a
-      letter if <strong>all three</strong> hit. A spin is
-      started from the keyboard, but <strong>which</strong> key is not shown—it changes after
-      each spin. <kbd>Enter</kbd> only submits.
-    </p>
+    <h1>Enter your name</h1>
+    
 
     <form id="nameForm" action="" method="get">
       <div class="slot-wrap">
@@ -575,12 +772,10 @@
       <input type="hidden" name="name" id="nameHidden" value="" />
 
       <div class="actions">
-        <button type="submit">Submit name (Enter)</button>
+        <button type="button" id="submitBtn">Submit name</button>
       </div>
       <p class="hint">
-        Only the ⌫ button can remove letters: it opens blackjack, and you lose a character only if you
-        <strong>win</strong> the hand. The <kbd>Backspace</kbd> key does nothing here. While spinning,
-        keys are ignored until the reels stop.
+        To get a letter you must find the randonly selected key to spin the roulette machine.
       </p>
 
       <output id="result" for="nameForm"></output>
@@ -615,9 +810,40 @@
     </div>
   </div>
 
+  <div id="rlBackdrop" class="rl-backdrop" hidden>
+    <div
+      class="rl-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="rlTitle"
+    >
+      <h2 id="rlTitle">Roulette — guess to submit</h2>
+      <p class="rl-sub">
+        European layout: <strong>0</strong> is green; other pockets are red or black like a real table.
+        Pick a color, then spin. You only submit if your guess matches where the ball lands (pointer at top).
+        Sometimes the spin is voided—no win or loss—try again.
+      </p>
+      <div class="rl-pick" id="rlPick">
+        <button type="button" class="rl-bet" data-color="red">Red</button>
+        <button type="button" class="rl-bet" data-color="black">Black</button>
+        <button type="button" class="rl-bet" data-color="green">Green</button>
+      </div>
+      <div class="rl-wheel-wrap">
+        <div class="rl-pointer" aria-hidden="true"></div>
+        <div id="rlWheel" class="rl-wheel" role="img" aria-label="Roulette wheel"></div>
+        <div class="rl-hub" aria-hidden="true"></div>
+      </div>
+      <p id="rlStatus" class="rl-status" aria-live="polite"></p>
+      <div class="rl-actions">
+        <button type="button" id="rlSpin" disabled>Spin the wheel</button>
+        <button type="button" id="rlCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     (function () {
-      /** Keys that may start a spin (Enter is never chosen). */
+      /** Keys that may start a spin (Enter is disabled app-wide). */
       var TRIGGER_POOL = "abcdefghijklmnopqrstuvwxyz0123456789".split("");
 
       /** Symbols the reel can land on (name-friendly subset). */
@@ -636,8 +862,14 @@
       /** Per-reel chance (0–1) that this reel “misses”; full payout needs all three to hit. */
       var SPIN_FAIL_CHANCE = 0.05;
       var result = document.getElementById("result");
+      var submitBtn = document.getElementById("submitBtn");
       var backspaceBtn = document.getElementById("backspaceBtn");
       var bjBackdrop = document.getElementById("bjBackdrop");
+      var rlBackdrop = document.getElementById("rlBackdrop");
+      var rlWheel = document.getElementById("rlWheel");
+      var rlStatus = document.getElementById("rlStatus");
+      var rlSpin = document.getElementById("rlSpin");
+      var rlCancel = document.getElementById("rlCancel");
       var bjDealerCards = document.getElementById("dealerCards");
       var bjPlayerCards = document.getElementById("playerCards");
       var bjDealerScore = document.getElementById("dealerScore");
@@ -672,6 +904,149 @@
           alpha +
           ")"
         );
+      }
+
+      var paletteSmoothEnabled = false;
+
+      var FLOATING_GIF_SRC =
+        "https://media1.tenor.com/m/E4qukggbFgEAAAAC/jjk-hikari.gif";
+
+      /** Matches .floating-gif width & aspect (200×116). */
+      function floatingGifPixelSize() {
+        var w = Math.min(200, window.innerWidth * 0.26);
+        var h = w * (116 / 200);
+        return { w: w, h: h };
+      }
+
+      /** True if two center positions (vw/vh %) would overlap including gap px padding. */
+      function floatingGifCentersOverlap(l1, t1, l2, t2, wpx, hpx, gap) {
+        var iw = window.innerWidth;
+        var ih = window.innerHeight;
+        var dx = Math.abs((l1 / 100) * iw - (l2 / 100) * iw);
+        var dy = Math.abs((t1 / 100) * ih - (t2 / 100) * ih);
+        var W = wpx + gap;
+        var H = hpx + gap;
+        return dx < W && dy < H;
+      }
+
+      function randomGifPositionVwVh() {
+        var tries = 0;
+        var t = 12;
+        var l = 5;
+        var inDanger;
+        while (tries < 48) {
+          tries++;
+          t = 6 + Math.random() * 86;
+          l = 4 + Math.random() * 88;
+          inDanger = l > 16 && l < 84 && t > 8 && t < 92;
+          if (!inDanger) break;
+        }
+        return { top: t, left: l };
+      }
+
+      /** Edge/corner presets (vw, vh) spaced for typical sizes; greedy pick avoids overlap. */
+      var FLOATING_GIF_PRESETS = [
+        [7, 14],
+        [7, 50],
+        [7, 86],
+        [93, 12],
+        [93, 48],
+        [93, 84],
+        [22, 7],
+        [48, 6],
+        [78, 8],
+        [24, 93],
+        [52, 92],
+        [80, 91],
+      ];
+
+      function shufflePresetIndices() {
+        var n = FLOATING_GIF_PRESETS.length;
+        var a = [];
+        for (var z = 0; z < n; z++) {
+          a.push(z);
+        }
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = a[i];
+          a[i] = a[j];
+          a[j] = t;
+        }
+        return a;
+      }
+
+      /** 1–5 decorative GIFs, non-overlapping, random non-center when possible (per spin). */
+      function positionFloatingGif() {
+        var host = document.getElementById("floatingGifHost");
+        if (!host) return;
+        host.innerHTML = "";
+        var count = 1 + Math.floor(Math.random() * 5);
+        var sz = floatingGifPixelSize();
+        var gap = 18;
+        var placed = [];
+
+        function conflicts(l, t) {
+          for (var p = 0; p < placed.length; p++) {
+            if (
+              floatingGifCentersOverlap(
+                l,
+                t,
+                placed[p][0],
+                placed[p][1],
+                sz.w,
+                sz.h,
+                gap
+              )
+            ) {
+              return true;
+            }
+          }
+          return false;
+        }
+
+        for (var i = 0; i < count; i++) {
+          var l;
+          var t;
+          var found = false;
+          var attempt;
+          for (attempt = 0; attempt < 140; attempt++) {
+            var pos = randomGifPositionVwVh();
+            l = pos.left;
+            t = pos.top;
+            if (!conflicts(l, t)) {
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            var order = shufflePresetIndices();
+            for (var q = 0; q < order.length; q++) {
+              var pr = FLOATING_GIF_PRESETS[order[q]];
+              l = pr[0];
+              t = pr[1];
+              if (!conflicts(l, t)) {
+                found = true;
+                break;
+              }
+            }
+          }
+          if (!found) {
+            break;
+          }
+          placed.push([l, t]);
+
+          var img = document.createElement("img");
+          img.className = "floating-gif";
+          img.src = FLOATING_GIF_SRC;
+          img.alt = "";
+          img.setAttribute("aria-hidden", "true");
+          img.decoding = "async";
+          img.width = 200;
+          img.height = 116;
+          img.style.top = t + "vh";
+          img.style.left = l + "vw";
+          host.appendChild(img);
+        }
       }
 
       /** Each CSS color token is chosen independently; on load and after every spin. */
@@ -755,11 +1130,186 @@
         r.setProperty("--c-bjc-fg", randHsl());
         r.setProperty("--c-bjc-bg", randHsla(0.22));
         r.setProperty("--c-bjc-border", randHsla(0.35));
+
+        if (!paletteSmoothEnabled) {
+          paletteSmoothEnabled = true;
+          window.requestAnimationFrame(function () {
+            document.documentElement.classList.add("palette-smooth");
+          });
+        }
+
+        positionFloatingGif();
       }
 
       var nameBuffer = "";
       var spinning = false;
       var currentTrigger = "";
+
+      /* --- Roulette submit gate (European colors: 0 green) --- */
+      var RL_RED_NUMS = {
+        1: 1,
+        3: 1,
+        5: 1,
+        7: 1,
+        9: 1,
+        12: 1,
+        14: 1,
+        16: 1,
+        18: 1,
+        19: 1,
+        21: 1,
+        23: 1,
+        25: 1,
+        27: 1,
+        30: 1,
+        32: 1,
+        34: 1,
+        36: 1,
+      };
+
+      /** Chance (0–1) the spin is voided (house fault)—no win/loss vs your guess; try again. */
+      var ROULETTE_SPIN_FAIL_CHANCE = 0.15;
+
+      var rlGuess = null;
+      var rlSpinning = false;
+      var rlAccumulatedRot = 0;
+
+      function rlPocketColor(index) {
+        if (index === 0) return "green";
+        return RL_RED_NUMS[index] ? "red" : "black";
+      }
+
+      function rlPocketHex(index) {
+        var c = rlPocketColor(index);
+        if (c === "green") return "#15803d";
+        if (c === "red") return "#b91c1c";
+        return "#171717";
+      }
+
+      function buildRlWheelGradient() {
+        var n = 37;
+        var seg = 360 / n;
+        var parts = [];
+        for (var i = 0; i < n; i++) {
+          var a0 = i * seg;
+          var a1 = (i + 1) * seg;
+          parts.push(rlPocketHex(i) + " " + a0 + "deg " + a1 + "deg");
+        }
+        return "conic-gradient(" + parts.join(", ") + ")";
+      }
+
+      function setRlBetButtonsDisabled(dis) {
+        var bets = document.querySelectorAll(".rl-bet");
+        for (var i = 0; i < bets.length; i++) {
+          bets[i].disabled = dis;
+        }
+      }
+
+      function openRoulette() {
+        if (spinning) return;
+        rlGuess = null;
+        rlSpinning = false;
+        rlStatus.textContent = "";
+        rlSpin.disabled = true;
+        var bets = document.querySelectorAll(".rl-bet");
+        for (var i = 0; i < bets.length; i++) {
+          bets[i].classList.remove("is-selected");
+          bets[i].disabled = false;
+        }
+        rlWheel.style.transition = "transform 4.85s cubic-bezier(0.18, 0.82, 0.22, 1)";
+        rlWheel.style.background = buildRlWheelGradient();
+        rlWheel.style.transform = "rotate(" + rlAccumulatedRot + "deg)";
+        rlBackdrop.hidden = false;
+        rlSpin.focus();
+      }
+
+      function closeRoulette() {
+        rlBackdrop.hidden = true;
+      }
+
+      function finalizeSubmitOutput() {
+        result.textContent = "Name submitted.";
+      }
+
+      function doRouletteSpin() {
+        if (!rlGuess || rlSpinning) return;
+        rlSpinning = true;
+        rlSpin.disabled = true;
+        setRlBetButtonsDisabled(true);
+        rlStatus.textContent = "Spinning…";
+
+        var spinFault = Math.random() < ROULETTE_SPIN_FAIL_CHANCE;
+        var winIndex = Math.floor(Math.random() * 37);
+        var seg = 360 / 37;
+        var theta = winIndex * seg + seg / 2;
+        var spins = 5 + Math.floor(Math.random() * 4);
+        var adjust = (360 - ((rlAccumulatedRot + theta) % 360)) % 360;
+        rlAccumulatedRot += spins * 360 + adjust;
+
+        function onTe(ev) {
+          if (ev.propertyName !== "transform") return;
+          rlWheel.removeEventListener("transitionend", onTe);
+          rlSpinning = false;
+          setRlBetButtonsDisabled(false);
+          var landed = rlPocketColor(winIndex);
+          if (spinFault) {
+            rlStatus.textContent =
+              "Spin fault — round voided, nothing counted. Try again.";
+            rlSpin.disabled = false;
+            return;
+          }
+          rlStatus.textContent =
+            "Landed on " + landed.toUpperCase() + " (pocket " + winIndex + ").";
+          if (rlGuess === landed) {
+            rlStatus.textContent += " Correct — submitted.";
+            closeRoulette();
+            rlAccumulatedRot = 0;
+            rlWheel.style.transition = "none";
+            rlWheel.style.transform = "rotate(0deg)";
+            void rlWheel.offsetWidth;
+            finalizeSubmitOutput();
+            rlSpin.disabled = true;
+          } else {
+            rlStatus.textContent += " Wrong — pick a color and spin again.";
+            rlSpin.disabled = false;
+          }
+        }
+
+        rlWheel.addEventListener("transitionend", onTe);
+        window.requestAnimationFrame(function () {
+          rlWheel.style.transform = "rotate(" + rlAccumulatedRot + "deg)";
+        });
+      }
+
+      var rlBetNodes = document.querySelectorAll(".rl-bet");
+      for (var rbi = 0; rbi < rlBetNodes.length; rbi++) {
+        rlBetNodes[rbi].addEventListener("click", function () {
+          if (rlSpinning) return;
+          var btn = this;
+          rlGuess = btn.getAttribute("data-color");
+          for (var rbj = 0; rbj < rlBetNodes.length; rbj++) {
+            rlBetNodes[rbj].classList.toggle("is-selected", rlBetNodes[rbj] === btn);
+          }
+          rlSpin.disabled = false;
+        });
+      }
+
+      rlSpin.addEventListener("click", function () {
+        doRouletteSpin();
+      });
+
+      rlCancel.addEventListener("click", function () {
+        closeRoulette();
+      });
+
+      rlBackdrop.addEventListener("click", function (e) {
+        if (e.target === rlBackdrop) closeRoulette();
+      });
+
+      submitBtn.addEventListener("click", function () {
+        if (spinning) return;
+        openRoulette();
+      });
 
       function randomTrigger() {
         var i = Math.floor(Math.random() * TRIGGER_POOL.length);
@@ -1082,56 +1632,79 @@
         return e.key.length === 1 && e.key.toLowerCase() === currentTrigger;
       }
 
-      document.addEventListener("keydown", function (e) {
-        if (!bjBackdrop.hidden) {
-          if (e.key === "Enter") e.preventDefault();
-          if (e.key === "Backspace") e.preventDefault();
-          if (e.key === "Escape") {
-            e.preventDefault();
-            closeBjModal();
-          }
-          return;
-        }
-
-        if (e.key === "Enter") {
-          if (spinning) {
+      document.addEventListener(
+        "keydown",
+        function (e) {
+          if (e.key === "Enter") {
             e.preventDefault();
             return;
           }
-          e.preventDefault();
-          form.requestSubmit();
-          return;
-        }
 
-        if (e.key === "Backspace") {
-          e.preventDefault();
-          return;
-        }
+          if (!rlBackdrop.hidden) {
+            if (e.key === "Backspace") e.preventDefault();
+            if (e.key === "Escape") {
+              e.preventDefault();
+              closeRoulette();
+            }
+            return;
+          }
 
-        if (spinning) return;
+          if (!bjBackdrop.hidden) {
+            if (e.key === "Backspace") e.preventDefault();
+            if (e.key === "Escape") {
+              e.preventDefault();
+              closeBjModal();
+            }
+            return;
+          }
 
-        if (keyMatchesTrigger(e)) {
-          e.preventDefault();
-          runSpin();
-        }
-      });
+          if (e.key === "Backspace") {
+            e.preventDefault();
+            return;
+          }
+
+          if (spinning) return;
+
+          if (keyMatchesTrigger(e)) {
+            e.preventDefault();
+            runSpin();
+          }
+        },
+        true
+      );
 
       backspaceBtn.addEventListener("click", function () {
         if (spinning) return;
         bjOpen();
       });
 
-      form.addEventListener("submit", function (e) {
-        e.preventDefault();
-        var q = nameBuffer.trim();
-        result.textContent = q
-          ? "Submitted (demo): “" + q + "”. In a real app this would POST; here nothing leaves your machine."
-          : "Submitted empty name — spin a few times first if you want letters.";
-      });
-
       applySpinPalette();
       pickNewTrigger();
       syncHidden();
+    })();
+  </script>
+
+  <!-- Put an MP3 (or OGG) next to this file as background-music.mp3, or change the src below. -->
+  <audio id="bgMusic" loop preload="auto" playsinline>
+    <source src="background-music.mp3" type="audio/mpeg" />
+    <source src="background-music.ogg" type="audio/ogg" />
+  </audio>
+  <script>
+    (function () {
+      var a = document.getElementById("bgMusic");
+      if (!a) return;
+      a.volume = 0.35;
+      function tryPlay() {
+        var p = a.play();
+        if (p && typeof p.catch === "function") p.catch(function () {});
+      }
+      tryPlay();
+      function unlockOnce() {
+        tryPlay();
+      }
+      document.addEventListener("click", unlockOnce, { once: true });
+      document.addEventListener("pointerdown", unlockOnce, { once: true });
+      document.addEventListener("keydown", unlockOnce, { once: true });
     })();
   </script>
 </body>
