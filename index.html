@@ -893,6 +893,13 @@
       var spinMsg = document.getElementById("spinMsg");
       /** Per-reel chance (0–1) that this reel “misses”; full payout needs all three to hit. */
       var SPIN_FAIL_CHANCE = 0.05;
+
+      /** Key spam during a slot spin nudges the target payout symbol toward that key (capped). */
+      var SLOT_SPAM_BIAS_BASE = 0.05;
+      var SLOT_SPAM_BIAS_PER_KEY = 0.01;
+      var SLOT_SPAM_BIAS_CAP = 0.38;
+
+      var slotKeySpam = {};
       var result = document.getElementById("result");
       var submitBtn = document.getElementById("submitBtn");
       var backspaceBtn = document.getElementById("backspaceBtn");
@@ -944,7 +951,8 @@
       var spinUseEasterEgg = false;
       var EASTER_EGG_CHANCE = 0.01;
       var YT_EASTER_EGG_ID = "Upsm3E2NUI8";
-      var GOKU_IMG_SRC = "goku-easter-egg.png";
+      var GOKU_IMG_SRC =
+        "https://i.pinimg.com/736x/02/ae/ed/02aeed97dcb6089eb5258d29fb9a759b.jpg";
 
       var FLOATING_GIF_SRC =
         "https://media1.tenor.com/m/E4qukggbFgEAAAAC/jjk-hikari.gif";
@@ -1646,23 +1654,38 @@
         return c;
       }
 
+      function slotCharsetHasKey(key) {
+        return key.length === 1 && SLOT_CHARS.indexOf(key) >= 0;
+      }
+
+      function pickSlotPayoutCharFromSpam(spam) {
+        var keys = Object.keys(spam);
+        var total = 0;
+        for (var si = 0; si < keys.length; si++) {
+          total += spam[keys[si]];
+        }
+        if (total === 0) return finalChar();
+        var bias = Math.min(
+          SLOT_SPAM_BIAS_CAP,
+          SLOT_SPAM_BIAS_BASE + total * SLOT_SPAM_BIAS_PER_KEY
+        );
+        if (Math.random() >= bias) return finalChar();
+        var maxC = 0;
+        for (var sj = 0; sj < keys.length; sj++) {
+          if (spam[keys[sj]] > maxC) maxC = spam[keys[sj]];
+        }
+        var dom = [];
+        for (var sk = 0; sk < keys.length; sk++) {
+          if (spam[keys[sk]] === maxC) dom.push(keys[sk]);
+        }
+        return dom[Math.floor(Math.random() * dom.length)];
+      }
+
       function runSpin() {
         if (spinning) return;
         spinning = true;
         spinMsg.textContent = "";
-
-        var payoutChar = finalChar();
-        var reelHit = [
-          Math.random() >= SPIN_FAIL_CHANCE,
-          Math.random() >= SPIN_FAIL_CHANCE,
-          Math.random() >= SPIN_FAIL_CHANCE,
-        ];
-        var fullPayout = reelHit[0] && reelHit[1] && reelHit[2];
-        var land = [
-          reelHit[0] ? payoutChar : charNot(payoutChar),
-          reelHit[1] ? payoutChar : charNot(payoutChar),
-          reelHit[2] ? payoutChar : charNot(payoutChar),
-        ];
+        slotKeySpam = {};
 
         var maxTicks = [
           14 + Math.floor(Math.random() * 10),
@@ -1670,11 +1693,25 @@
           30 + Math.floor(Math.random() * 12),
         ];
 
-        var remaining = 3;
+        var reelsFinished = 0;
 
-        function onReelStopped() {
-          remaining--;
-          if (remaining > 0) return;
+        function onAllReelsDone() {
+          var payoutChar = pickSlotPayoutCharFromSpam(slotKeySpam);
+          var reelHit = [
+            Math.random() >= SPIN_FAIL_CHANCE,
+            Math.random() >= SPIN_FAIL_CHANCE,
+            Math.random() >= SPIN_FAIL_CHANCE,
+          ];
+          var fullPayout = reelHit[0] && reelHit[1] && reelHit[2];
+          var land = [
+            reelHit[0] ? payoutChar : charNot(payoutChar),
+            reelHit[1] ? payoutChar : charNot(payoutChar),
+            reelHit[2] ? payoutChar : charNot(payoutChar),
+          ];
+          for (var ri = 0; ri < 3; ri++) {
+            reelEls[ri].classList.remove("spinning");
+            reelEls[ri].textContent = land[ri];
+          }
           spinning = false;
           if (fullPayout) {
             nameBuffer += payoutChar;
@@ -1705,9 +1742,10 @@
               window.setTimeout(tick, interval);
               return;
             }
-            el.classList.remove("spinning");
-            el.textContent = land[index];
-            onReelStopped();
+            reelsFinished++;
+            if (reelsFinished >= 3) {
+              onAllReelsDone();
+            }
           }
 
           window.setTimeout(tick, interval);
@@ -1756,7 +1794,12 @@
             return;
           }
 
-          if (spinning) return;
+          if (spinning) {
+            if (slotCharsetHasKey(e.key)) {
+              slotKeySpam[e.key] = (slotKeySpam[e.key] || 0) + 1;
+            }
+            return;
+          }
 
           if (keyMatchesTrigger(e)) {
             e.preventDefault();
