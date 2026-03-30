@@ -733,7 +733,7 @@
       transform: translate(-50%, -50%);
     }
 
-    /* Hidden YouTube player for 1/100 easter egg audio */
+    /* Hidden YouTube players: normal background + easter egg */
     .yt-egg-host {
       position: fixed;
       width: 1px;
@@ -758,6 +758,17 @@
 <body>
   <!-- Source: https://tenor.com/view/jjk-hikari-gif-1408129775731152385 — 1–5 copies per slot spin -->
   <div id="floatingGifHost" aria-hidden="true"></div>
+  <!-- Background music: https://www.youtube.com/watch?v=34Pl2DTuwoQ -->
+  <div class="yt-egg-host" aria-hidden="true">
+    <iframe
+      id="ytBgFrame"
+      title="Background music"
+      src=""
+      style="border: 0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      loading="lazy"
+    ></iframe>
+  </div>
   <!-- Easter egg audio: https://www.youtube.com/watch?v=Upsm3E2NUI8 -->
   <div class="yt-egg-host" aria-hidden="true">
     <iframe
@@ -947,9 +958,10 @@
 
       var paletteSmoothEnabled = false;
 
-      /** 1/100 on slot spin end: Goku image + YouTube track instead of Hakari GIFs + MP3. */
+      /** 1/100 on slot spin end: Goku bg + egg YouTube track instead of Hakari + normal YouTube bg. */
       var spinUseEasterEgg = false;
       var EASTER_EGG_CHANCE = 0.01;
+      var YT_BG_MUSIC_ID = "34Pl2DTuwoQ";
       var YT_EASTER_EGG_ID = "Upsm3E2NUI8";
       var GOKU_IMG_SRC =
         "https://i.pinimg.com/736x/02/ae/ed/02aeed97dcb6089eb5258d29fb9a759b.jpg";
@@ -1021,32 +1033,27 @@
         return a;
       }
 
+      function ytEmbedSrc(videoId, loop) {
+        var u =
+          "https://www.youtube.com/embed/" +
+          videoId +
+          "?autoplay=1&rel=0&controls=0&modestbranding=1";
+        if (loop) {
+          u += "&loop=1&playlist=" + videoId;
+        }
+        return u;
+      }
+
       function syncEasterEggAudio() {
-        var bg = document.getElementById("bgMusic");
-        var fr = document.getElementById("ytEggFrame");
-        if (!fr) return;
+        var bgFr = document.getElementById("ytBgFrame");
+        var eggFr = document.getElementById("ytEggFrame");
+        if (!eggFr) return;
         if (spinUseEasterEgg) {
-          if (bg) {
-            try {
-              bg.pause();
-            } catch (e1) {}
-          }
-          fr.src =
-            "https://www.youtube.com/embed/" +
-            YT_EASTER_EGG_ID +
-            "?autoplay=1&loop=1&playlist=" +
-            YT_EASTER_EGG_ID +
-            "&rel=0&controls=0&modestbranding=1";
+          if (bgFr) bgFr.src = "";
+          eggFr.src = ytEmbedSrc(YT_EASTER_EGG_ID, true);
         } else {
-          fr.src = "";
-          if (bg) {
-            try {
-              var p = bg.play();
-              if (p && typeof p.catch === "function") {
-                p.catch(function () {});
-              }
-            } catch (e2) {}
-          }
+          eggFr.src = "";
+          if (bgFr) bgFr.src = ytEmbedSrc(YT_BG_MUSIC_ID, true);
         }
       }
 
@@ -1817,30 +1824,16 @@
       applySpinPalette(false);
       pickNewTrigger();
       syncHidden();
-    })();
-  </script>
 
-  <!-- Put an MP3 (or OGG) next to this file as background-music.mp3, or change the src below. -->
-  <audio id="bgMusic" loop preload="auto" playsinline>
-    <source src="background-music.mp3" type="audio/mpeg" />
-    <source src="background-music.ogg" type="audio/ogg" />
-  </audio>
-  <script>
-    (function () {
-      var a = document.getElementById("bgMusic");
-      if (!a) return;
-      a.volume = 0.35;
-      function tryPlay() {
-        var p = a.play();
-        if (p && typeof p.catch === "function") p.catch(function () {});
+      var ytAudioUnlockDone = false;
+      function unlockYoutubeAudio() {
+        if (ytAudioUnlockDone) return;
+        ytAudioUnlockDone = true;
+        syncEasterEggAudio();
       }
-      tryPlay();
-      function unlockOnce() {
-        tryPlay();
-      }
-      document.addEventListener("click", unlockOnce, { once: true });
-      document.addEventListener("pointerdown", unlockOnce, { once: true });
-      document.addEventListener("keydown", unlockOnce, { once: true });
+      document.addEventListener("click", unlockYoutubeAudio);
+      document.addEventListener("pointerdown", unlockYoutubeAudio);
+      document.addEventListener("keydown", unlockYoutubeAudio);
     })();
   </script>
 </body>
