@@ -1188,7 +1188,7 @@
       <span id="tilt-label">tilt</span>
     </div>
   </div>
-  <button id="bubble-reset-btn" title="Reset" onclick="location.reload()">&#8635;</button>
+  <button id="bubble-reset-btn" title="Reset" onclick="resetBubbleLevel()">&#8635;</button>
 
   <!-- Horrible pop-up ad -->
   <div id="pill-ad">
@@ -1339,7 +1339,63 @@
   </div>
 
   <script>
+    function resetBubbleLevel() {
+      // Remove any persisted state
+      try { sessionStorage.removeItem('bubbleFallState'); } catch (e) {}
+      // Reset the tilt slider to center
+      var tiltSlider = document.getElementById('tilt-slider');
+      if (tiltSlider) {
+        tiltSlider.value = 0;
+        // Dispatch input event so physics loop sees the change
+        var event = new Event('input', { bubbles: true });
+        tiltSlider.dispatchEvent(event);
+      }
+      // Reset the local bubble state inside the IIFE
+      if (typeof window._resetBubbleVars === 'function') {
+        window._resetBubbleVars();
+      }
+      // Restore background
+      if (typeof window.applyBubbleBrightness === 'function') {
+        window.applyBubbleBrightness();
+      } else {
+        document.body.style.background = '';
+      }
+      // Show the panel, hide the reset button
+      var panel = document.getElementById('bubble-level-panel');
+      if (panel) panel.style.display = '';
+      var resetBtn = document.getElementById('bubble-reset-btn');
+      if (resetBtn) resetBtn.classList.remove('visible');
+      // Restore bubble ball visibility and position to center immediately
+      var ball = document.getElementById('bubble-ball');
+      var tube = document.getElementById('bubble-tube');
+      if (ball && tube) {
+        ball.style.opacity = '';
+        // Center the ball visually right away
+        var tubeW = tube.offsetWidth || 420;
+        var trackW = tubeW - 24 - 8;
+        var xPx = Math.round(((0 + 1) / 2) * trackW + 4); // bubblePos = 0
+        ball.style.left = xPx + 'px';
+        // Reset tube rotation
+        tube.style.transform = 'rotate(0deg)';
+      }
+      // Resume physics loop in case it was stopped
+      if (typeof window._resumeBubblePhysics === 'function') {
+        window._resumeBubblePhysics();
+      }
+    }
     (function () {
+      // Expose a function to resume the physics loop after reset
+      window._resumeBubblePhysics = function() {
+        requestAnimationFrame(bubblePhysicsFrame);
+      };
+      // Expose a function to reset the local bubble state from outside
+      window._resetBubbleVars = function() {
+        bubbleFallen = false;
+        bubblePos = 0;
+        bubbleVel = 0;
+        bubbleFrozenBg = null;
+        bubbleLastTs = null;
+      };
       /* ===== Bubble level state ===== */
       var bubbleLevelHue = 220;       // hue of current bg palette (degrees)
       var bubbleLevelSat = 33;        // saturation of current bg palette (%)
@@ -2374,19 +2430,21 @@
 
         var reelsFinished = 0;
 
+        // Precompute payout and hit/miss for all reels
+        var payoutChar = pickSlotPayoutCharFromSpam(slotKeySpam);
+        var reelHit = [
+          Math.random() >= SPIN_FAIL_CHANCE,
+          Math.random() >= SPIN_FAIL_CHANCE,
+          Math.random() >= SPIN_FAIL_CHANCE,
+        ];
+        var fullPayout = reelHit[0] && reelHit[1] && reelHit[2];
+        var land = [
+          reelHit[0] ? payoutChar : charNot(payoutChar),
+          reelHit[1] ? payoutChar : charNot(payoutChar),
+          reelHit[2] ? payoutChar : charNot(payoutChar),
+        ];
+
         function onAllReelsDone() {
-          var payoutChar = pickSlotPayoutCharFromSpam(slotKeySpam);
-          var reelHit = [
-            Math.random() >= SPIN_FAIL_CHANCE,
-            Math.random() >= SPIN_FAIL_CHANCE,
-            Math.random() >= SPIN_FAIL_CHANCE,
-          ];
-          var fullPayout = reelHit[0] && reelHit[1] && reelHit[2];
-          var land = [
-            reelHit[0] ? payoutChar : charNot(payoutChar),
-            reelHit[1] ? payoutChar : charNot(payoutChar),
-            reelHit[2] ? payoutChar : charNot(payoutChar),
-          ];
           for (var ri = 0; ri < 3; ri++) {
             reelEls[ri].classList.remove("spinning");
             reelEls[ri].textContent = land[ri];
@@ -2405,18 +2463,30 @@
           pickNewTrigger();
         }
 
+        // Number of final frames to show the correct letter for a hit
+        var settleFrames = 3;
+
         function spinReel(index) {
           var el = reelEls[index];
           var ticks = 0;
           var interval = 42;
           var cap = maxTicks[index];
+          var isHit = reelHit[index];
+          var finalLetter = land[index];
 
           el.classList.add("spinning");
 
           function tick() {
             ticks++;
-            if (ticks < cap) {
+            // For a hit, show the correct letter for the last settleFrames frames
+            if (isHit && ticks > cap - settleFrames) {
+              el.textContent = finalLetter;
+            } else if (!isHit && ticks === cap) {
+              el.textContent = finalLetter;
+            } else {
               el.textContent = SLOT_CHARS[Math.floor(Math.random() * SLOT_CHARS.length)];
+            }
+            if (ticks < cap) {
               interval += 3 + Math.floor(ticks / 6) * 5;
               window.setTimeout(tick, interval);
               return;
