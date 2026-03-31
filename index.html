@@ -808,9 +808,405 @@
       opacity: 0.55;
       cursor: not-allowed;
     }
+
+    /* ===== Pill Ad ===== */
+    @keyframes adFlash {
+      0%, 49% { background: #ff0080; }
+      50%, 100% { background: #ffee00; }
+    }
+    @keyframes adBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    @keyframes adPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+    @keyframes adSpin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    #pill-ad {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99998;
+      width: min(680px, 98vw);
+      background: #fff;
+      border: 4px solid #ff0000;
+      border-bottom: none;
+      border-radius: 10px 10px 0 0;
+      box-shadow: 0 -6px 40px rgba(255,0,100,0.55), 0 0 0 3px #ffee00;
+      font-family: Arial, Helvetica, sans-serif;
+      overflow: hidden;
+    }
+
+    #pill-ad-close {
+      position: absolute;
+      top: 2px;
+      right: 3px;
+      width: 13px;
+      height: 13px;
+      font-size: 7px;
+      line-height: 1;
+      padding: 0;
+      border: 1px solid #999;
+      background: #ddd;
+      color: #555;
+      cursor: pointer;
+      border-radius: 2px;
+      z-index: 2;
+    }
+
+    #pill-ad-inner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 18px 6px 12px;
+      background: linear-gradient(135deg, #fffbe6 0%, #fff0f6 100%);
+    }
+
+    #pill-ad-badge {
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      font-size: 0.55rem;
+      background: #ccc;
+      color: #555;
+      padding: 1px 3px;
+      border-radius: 2px;
+    }
+
+    #pill-ad-img {
+      width: 110px;
+      flex-shrink: 0;
+      animation: adBounce 1.1s ease-in-out infinite;
+      filter: drop-shadow(0 4px 8px rgba(255,130,0,0.4));
+    }
+
+    #pill-ad-text {
+      flex: 1;
+    }
+
+    #pill-ad-headline {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #cc0000;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+      animation: adBounce 0.7s ease-in-out infinite;
+      line-height: 1.2;
+    }
+
+    #pill-ad-sub {
+      font-size: 0.82rem;
+      color: #333;
+      margin: 3px 0;
+      line-height: 1.4;
+    }
+
+    #pill-ad-highlight {
+      color: #cc0000;
+      font-weight: 900;
+      font-size: 1rem;
+    }
+
+    #pill-ad-product {
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: #0033cc;
+      letter-spacing: -0.02em;
+    }
+
+    #pill-ad-pro {
+      background: linear-gradient(90deg, #ff6600, #ffcc00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-style: italic;
+    }
+
+    #pill-ad-bullets {
+      font-size: 0.72rem;
+      color: #333;
+      margin: 3px 0 5px;
+      line-height: 1.6;
+    }
+
+    #pill-ad-price {
+      font-size: 0.85rem;
+      color: #333;
+      margin-bottom: 6px;
+    }
+
+    #pill-ad-price strong {
+      font-size: 1.4rem;
+      color: #cc0000;
+    }
+
+    #pill-ad-limit {
+      background: #ff0000;
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 3px;
+      animation: adFlash 0.6s step-end infinite;
+      vertical-align: middle;
+    }
+
+    #pill-ad-cta {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      background: linear-gradient(90deg, #ff4400, #ff0080);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 900;
+      border: 3px solid #ffee00;
+      border-radius: 6px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      animation: adPulse 0.9s ease-in-out infinite;
+    }
+
+    #pill-ad-marquee {
+      display: block;
+      background: #ff0000;
+      color: #ffee00;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 3px 0;
+      letter-spacing: 0.04em;
+    }
+
+    /* ===== Bubble Level Widget ===== */
+    #bubble-level-panel {
+      position: fixed;
+      top: 0.65rem;
+      left: 0.65rem;
+      z-index: 10050;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.55rem 0.7rem;
+      background: rgba(15, 20, 28, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(8px);
+      user-select: none;
+    }
+
+    #bubble-tube-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 420px;
+      height: 60px;
+    }
+
+    #bubble-tube {
+      position: relative;
+      width: 420px;
+      height: 32px;
+      border-radius: 16px;
+      background: linear-gradient(
+        180deg,
+        rgba(180, 220, 255, 0.07) 0%,
+        rgba(60, 100, 160, 0.26) 50%,
+        rgba(20, 40, 80, 0.52) 100%
+      );
+      border: 2px solid rgba(140, 190, 255, 0.26);
+      box-shadow:
+        inset 0 3px 10px rgba(0, 0, 0, 0.52),
+        inset 0 -1px 4px rgba(140, 200, 255, 0.07),
+        0 3px 10px rgba(0, 0, 0, 0.3);
+      overflow: visible;
+      transform-origin: center center;
+    }
+
+    #bubble-tube::before {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 12%;
+      width: 76%;
+      height: 7px;
+      border-radius: 3.5px;
+      background: rgba(210, 235, 255, 0.11);
+      pointer-events: none;
+    }
+
+    #bubble-ball {
+      position: absolute;
+      top: 4px;
+      left: 68px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle at 35% 30%,
+        rgba(230, 255, 230, 0.95) 0%,
+        rgba(80, 220, 80, 0.85) 45%,
+        rgba(15, 110, 15, 0.75) 100%
+      );
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.5),
+        inset 0 2px 4px rgba(255, 255, 255, 0.55),
+        0 0 14px rgba(60, 210, 60, 0.45);
+      will-change: left;
+    }
+
+    #bubble-tube-center-mark {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 2px;
+      height: 18px;
+      background: rgba(200, 230, 255, 0.32);
+      border-radius: 1px;
+      pointer-events: none;
+    }
+
+    .bubble-tube-side-mark {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1px;
+      height: 13px;
+      background: rgba(200, 230, 255, 0.18);
+      border-radius: 1px;
+      pointer-events: none;
+    }
+
+    #tilt-slider-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    #tilt-label {
+      font-size: 0.58rem;
+      color: rgba(200, 220, 255, 0.5);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    #tilt-slider {
+      writing-mode: vertical-lr;
+      direction: rtl;
+      -webkit-appearance: slider-vertical;
+      appearance: slider-vertical;
+      width: 20px;
+      height: 78px;
+      cursor: ns-resize;
+      accent-color: rgba(140, 190, 255, 0.85);
+      margin: 0;
+    }
+
+    .bubble-fall-clone {
+      position: fixed;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 99999;
+      background: radial-gradient(
+        circle at 35% 30%,
+        rgba(230, 255, 230, 0.95) 0%,
+        rgba(80, 220, 80, 0.85) 45%,
+        rgba(15, 110, 15, 0.75) 100%
+      );
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.5),
+        inset 0 2px 4px rgba(255, 255, 255, 0.55),
+        0 0 14px rgba(60, 210, 60, 0.45);
+    }
+
+    #bubble-reset-btn {
+      display: none;
+      position: fixed;
+      top: 0.65rem;
+      left: 0.65rem;
+      z-index: 10051;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(15, 20, 28, 0.88);
+      backdrop-filter: blur(8px);
+      color: rgba(200, 220, 255, 0.85);
+      font-size: 1.2rem;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      transition: background 0.15s, transform 0.15s;
+    }
+
+    #bubble-reset-btn:hover {
+      background: rgba(40, 55, 80, 0.92);
+      transform: rotate(-30deg) scale(1.1);
+    }
+
+    #bubble-reset-btn.visible {
+      display: flex;
+    }
+
+    @keyframes bubbleFallRight {
+      0%   { transform: translate(0, 0) rotate(0deg);      opacity: 1; }
+      18%  { transform: translate(28px, -10px) rotate(100deg); opacity: 1; }
+      100% { transform: translate(240px, 280px) rotate(560deg); opacity: 0; }
+    }
+
+    @keyframes bubbleFallLeft {
+      0%   { transform: translate(0, 0) rotate(0deg);        opacity: 1; }
+      18%  { transform: translate(-28px, -10px) rotate(-100deg); opacity: 1; }
+      100% { transform: translate(-240px, 280px) rotate(-560deg); opacity: 0; }
+    }
   </style>
 </head>
 <body>
+  <!-- Bubble level brightness widget -->
+  <div id="bubble-level-panel" aria-hidden="true">
+    <div id="bubble-tube-wrapper">
+      <div id="bubble-tube">
+        <div id="bubble-tube-center-mark"></div>
+        <div class="bubble-tube-side-mark" style="left:20%"></div>
+        <div class="bubble-tube-side-mark" style="right:20%"></div>
+        <div id="bubble-ball"></div>
+      </div>
+    </div>
+    <div id="tilt-slider-wrap">
+      <input type="range" id="tilt-slider" min="-100" max="100" value="0" step="1" aria-label="Tube tilt" />
+      <span id="tilt-label">tilt</span>
+    </div>
+  </div>
+  <button id="bubble-reset-btn" title="Reset" onclick="location.reload()">&#8635;</button>
+
+  <!-- Horrible pop-up ad -->
+  <div id="pill-ad">
+    <button id="pill-ad-close" title="close" onclick="(function(ad){ad.style.display='none';setTimeout(function(){ad.style.display='';},5000);})(document.getElementById('pill-ad'))">✕</button>
+    <div id="pill-ad-inner">
+      <div id="pill-ad-badge">AD</div>
+      <img src="https://i5.walmartimages.com/asr/8714f965-d797-49c0-a064-bca9eefe31d8.4eb12f9d4b1fb9fea2900a9bf1d8b40b.jpeg" id="pill-ad-img" alt="StudyPills" />
+      <div id="pill-ad-text">
+        <div id="pill-ad-headline">🧠 DOCTORS HATE HIM!! 🧠</div>
+        <div id="pill-ad-sub">Local student discovers <strong>ONE WEIRD TRICK</strong> to get<br><span id="pill-ad-highlight">STRAIGHT A's OVERNIGHT!!</span></div>
+        <div id="pill-ad-product">StudyPillz™ <span id="pill-ad-pro">PRO</span></div>
+        <div id="pill-ad-bullets">✅ Boost IQ by 400%&nbsp;&nbsp;✅ No sleep needed<br>✅ FDA <em>not</em> approved&nbsp;&nbsp;✅ Totally safe probably</div>
+        <div id="pill-ad-price"><s>$299.99</s> &nbsp;<strong>$4.99</strong> <span id="pill-ad-limit">LIMITED TIME!!!!</span></div>
+        <button id="pill-ad-cta" onclick="alert('Congratulations!! You have been selected for a FREE trial of StudyPillz™ PRO!\n\nPlease enter your credit card to claim.')">BUY NOW →</button>
+      </div>
+    </div>
+    <marquee id="pill-ad-marquee" scrollamount="4">🔥 FLASH SALE 🔥 &nbsp;&nbsp; StudyPillz™ — Think Smarter Not Harder™ &nbsp;&nbsp; 🔥 ONLY 3 LEFT IN STOCK 🔥 &nbsp;&nbsp; ORDER NOW BEFORE ITS TOO LATE &nbsp;&nbsp; ⭐⭐⭐⭐⭐ 47,000 five-star reviews &nbsp;&nbsp; 🔥 FLASH SALE 🔥</marquee>
+  </div>
   <!-- Source: https://tenor.com/view/jjk-hikari-gif-1408129775731152385 — 1–5 copies per slot spin -->
   <div id="floatingGifHost" aria-hidden="true"></div>
   <div
@@ -944,6 +1340,42 @@
 
   <script>
     (function () {
+      /* ===== Bubble level state ===== */
+      var bubbleLevelHue = 220;       // hue of current bg palette (degrees)
+      var bubbleLevelSat = 33;        // saturation of current bg palette (%)
+      var bubblePos     = 0;          // -1 (far left) … 0 (center) … 1 (far right)
+      var bubbleVel     = 0;          // velocity in pos-units per ms
+      var bubbleFallen  = false;
+      var bubbleFrozenBg = null;      // background string locked in at fall-off
+      var bubbleLevelEggMode = false;
+      var bubbleLastTs  = null;
+
+      /* Restore fall state from previous session (survive reset button reload) */
+      (function () {
+        var saved = sessionStorage.getItem('bubbleFallState');
+        if (!saved) return;
+        try {
+          var st = JSON.parse(saved);
+          sessionStorage.removeItem('bubbleFallState');
+          bubbleLevelHue = st.hue || 220;
+          bubbleFallen   = true;
+          var h = bubbleLevelHue;
+          bubbleFrozenBg = st.dir === 'right'
+            ? 'radial-gradient(ellipse 120% 80% at 50% -20%,hsl(' + h + ',100%,65%) 0%,hsl(' + h + ',68%,40%) 55%)'
+            : 'radial-gradient(ellipse 120% 80% at 50% -20%,hsl(' + h + ',45%,10%) 0%,hsl(' + h + ',30%,6%) 55%)';
+          document.body.style.background = bubbleFrozenBg;
+          /* Show reset button, hide panel immediately */
+          window.addEventListener('DOMContentLoaded', function () {
+            var panel = document.getElementById('bubble-level-panel');
+            if (panel) panel.style.display = 'none';
+            var btn = document.getElementById('bubble-reset-btn');
+            if (btn) btn.classList.add('visible');
+          });
+        } catch (e) {}
+      })();
+      var BUBBLE_GRAV   = 0.000012;   // acceleration (pos-units/ms²) per unit tilt
+      var BUBBLE_DAMP   = 0.9982;     // velocity multiplier per ms
+
       /** Keys that may start a spin (Enter is disabled app-wide). */
       var TRIGGER_POOL = "abcdefghijklmnopqrstuvwxyz0123456789".split("");
 
@@ -1286,12 +1718,18 @@
       function syncEasterEggPageBackground() {
         var b = document.body;
         if (spinUseEasterEgg) {
+          bubbleLevelEggMode = true;
           b.style.background =
             'url("' +
             GOKU_IMG_SRC +
             '") center / cover no-repeat fixed';
         } else {
-          b.style.background = "";
+          bubbleLevelEggMode = false;
+          if (bubbleFallen) {
+            if (bubbleFrozenBg) b.style.background = bubbleFrozenBg;
+          } else {
+            applyBubbleBrightness();
+          }
         }
       }
 
@@ -1377,8 +1815,15 @@
        */
       function applySpinPalette(isAfterSlotSpin) {
         var r = document.documentElement.style;
-        r.setProperty("--c-body-grad-mid", randHsl());
+        var _bgMidRaw = randHsl();
+        r.setProperty("--c-body-grad-mid", _bgMidRaw);
         r.setProperty("--c-body-grad-outer", randHsl());
+        /* Capture hue/sat for bubble-level brightness control */
+        var _bgMidM = _bgMidRaw.match(/hsl\((\d+),\s*(\d+)%/);
+        if (_bgMidM) {
+          bubbleLevelHue = parseInt(_bgMidM[1]);
+          bubbleLevelSat = parseInt(_bgMidM[2]);
+        }
         r.setProperty("--c-body-text", randHsl());
         r.setProperty("--c-h1", randHsl());
         r.setProperty("--c-lede", randHsl());
@@ -2085,6 +2530,122 @@
       document.addEventListener("click", unlockYoutubeAudio);
       document.addEventListener("pointerdown", unlockYoutubeAudio);
       document.addEventListener("keydown", unlockYoutubeAudio);
+
+      /* ===== Bubble Level — physics, brightness, fall-off ===== */
+
+      /**
+       * Compute a brightness-adjusted body background gradient from the
+       * current palette hue and the bubble's horizontal position.
+       *  t = 0  (far left)  → very dark
+       *  t = 0.5 (center)   → natural mid-tone
+       *  t = 1  (far right) → extreme neon
+       */
+      function applyBubbleBrightness() {
+        if (bubbleFallen || bubbleLevelEggMode) return;
+        var t = Math.max(0, Math.min(1, (bubblePos + 1) / 2));
+        var h = bubbleLevelHue;
+        var s, lMid, lOut;
+        if (t <= 0.5) {
+          var u = t / 0.5;
+          s    = Math.round(45 + u * 20);   /* 45 → 65  (stays saturated, just darker) */
+          lMid = Math.round(10 + u * 18);   /* 10 → 28  (dark but not black) */
+          lOut = Math.round(6  + u * 9);    /* 6  → 15  */
+        } else {
+          var u = (t - 0.5) / 0.5;
+          s    = Math.round(65 + u * 35);   /* 65  → 100 */
+          lMid = Math.round(28 + u * 37);   /* 28  → 65  */
+          lOut = Math.round(15 + u * 25);   /* 15  → 40  */
+        }
+        var sOut = Math.round(s * 0.68);
+        document.body.style.background =
+          'radial-gradient(ellipse 120% 80% at 50% -20%,' +
+          'hsl(' + h + ',' + s + '%,' + lMid + '%) 0%,' +
+          'hsl(' + h + ',' + sOut + '%,' + lOut + '%) 55%)';
+      }
+
+      function triggerBubbleFall(dir) {
+        if (bubbleFallen) return;
+        bubbleFallen = true;
+
+        var ball = document.getElementById('bubble-ball');
+        if (ball) {
+          var rect = ball.getBoundingClientRect();
+          var clone = document.createElement('div');
+          clone.className = 'bubble-fall-clone';
+          clone.style.top  = rect.top  + 'px';
+          clone.style.left = rect.left + 'px';
+          clone.style.animation =
+            (dir === 'right' ? 'bubbleFallRight' : 'bubbleFallLeft') +
+            ' 1.45s cubic-bezier(0.4,0,1,1) forwards';
+          document.body.appendChild(clone);
+          ball.style.opacity = '0';
+          /* Remove clone after animation ends */
+          clone.addEventListener('animationend', function () {
+            clone.parentNode && clone.parentNode.removeChild(clone);
+          });
+        }
+
+        /* Freeze background at the color of whichever side the ball fell off */
+        var h = bubbleLevelHue;
+        bubbleFrozenBg = dir === 'right'
+          ? 'radial-gradient(ellipse 120% 80% at 50% -20%,hsl(' + h + ',100%,65%) 0%,hsl(' + h + ',68%,40%) 55%)'
+          : 'radial-gradient(ellipse 120% 80% at 50% -20%,hsl(' + h + ',45%,10%) 0%,hsl(' + h + ',30%,6%) 55%)';
+        document.body.style.background = bubbleFrozenBg;
+        /* Persist across the reset-button reload */
+        try { sessionStorage.setItem('bubbleFallState', JSON.stringify({ hue: h, dir: dir })); } catch (e) {}
+
+        /* Show reset button, hide the level panel */
+        var panel = document.getElementById('bubble-level-panel');
+        if (panel) panel.style.display = 'none';
+        var resetBtn = document.getElementById('bubble-reset-btn');
+        if (resetBtn) resetBtn.classList.add('visible');
+      }
+
+      function bubblePhysicsFrame(ts) {
+        if (bubbleFallen) return;
+
+        if (bubbleLastTs !== null) {
+          var dt   = Math.min(ts - bubbleLastTs, 50); /* cap at 50 ms */
+          var slEl = document.getElementById('tilt-slider');
+          var tilt = slEl ? (parseInt(slEl.value, 10) / 100) : 0;
+
+          /* Physics: gravity along tilted tube */
+          bubbleVel += -tilt * BUBBLE_GRAV * dt;
+          bubbleVel *= Math.pow(BUBBLE_DAMP, dt);   /* apply per-ms damping */
+          bubblePos += bubbleVel * dt;
+
+          /* Fall-off detection */
+          if (bubblePos > 1.05) { triggerBubbleFall('right'); return; }
+          if (bubblePos < -1.05) { triggerBubbleFall('left');  return; }
+
+          /* Clamp for visual positioning only */
+          var visPosClamp = Math.max(-1, Math.min(1, bubblePos));
+
+          /* Rotate tube to show tilt */
+          var tube = document.getElementById('bubble-tube');
+          if (tube) {
+            tube.style.transform = 'rotate(' + (-tilt * 15) + 'deg)';
+          }
+
+          /* Slide bubble along tube */
+          var ball = document.getElementById('bubble-ball');
+          if (ball && tube) {
+            var tubeW  = tube.offsetWidth || 420;
+            var trackW = tubeW - 24 - 8;   /* inner track: tubeWidth - ballSize - 2*padding */
+            var xPx    = Math.round(((visPosClamp + 1) / 2) * trackW + 4);
+            ball.style.left = xPx + 'px';
+          }
+
+          applyBubbleBrightness();
+        }
+
+        bubbleLastTs = ts;
+        requestAnimationFrame(bubblePhysicsFrame);
+      }
+
+      /* Kick off the physics loop */
+      requestAnimationFrame(bubblePhysicsFrame);
+
     })();
   </script>
 </body>
